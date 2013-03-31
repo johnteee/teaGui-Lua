@@ -17,7 +17,9 @@ local teaUI = Object:new{
 	
 	--Layout
 	screenWidth = 800, screenHeight = 600,
-	backgroundColor = 0x77
+	backgroundColor = 0x77,
+	fontWidth = 14, fontHeight = 24,
+	title = "This is a test"
 }
 
 function teaUI:init()
@@ -49,6 +51,9 @@ function teaUI:init()
 	self.screenWidth = 800
 	self.screenHeight = 600
 	self.backgroundColor = 0x77
+	self.fontWidth = 14
+	self.fontHeight = 24
+	self.title = "This is a test"
 	
 	--Element
 	self:initElement()
@@ -143,15 +148,23 @@ end
 
 function teaUI:render()
 	self:drawRect( 0, 0, self.screenWidth, self.screenHeight, self.backgroundColor )
-	self:drawString( "0DDTest1238919283891289319823123", 10, 10 )
+	self:drawString( self.title, 10, 10 )
 end
 
 function teaUI:refresh()
 	sdl.SDL_UpdateRect( self.screen, 0, 0, self.screenWidth, self.screenHeight )
 end
 
+function teaUI:setTitle( str )
+	self.title = str
+end
+
 function teaUI:randomBgColor()
 	self.backgroundColor = bor( sdl.SDL_GetTicks() * 0xc0cac01a, 0x77 )
+end
+
+function teaUI:isShowCursorNow()
+	return band(shiftRight(sdl.SDL_GetTicks(), 8), 1)
 end
 
 function teaUI:quit()
@@ -184,7 +197,7 @@ function teaUI:detectEvent( rawEvent )
 		if key == sdl.SDLK_ESCAPE then
 			self.isShoudExit = true
 		elseif key == sdl.SDLK_F1 then
-			self.backgroundColor = bor( sdl.SDL_GetTicks() * 0xc0cac01a, 0x77 )
+			self:randomBgColor()
 		end
 	end
 end

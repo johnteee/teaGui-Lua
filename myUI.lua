@@ -4,7 +4,8 @@
 package.path = package.path .. ";./lib/?.lua"
 local teaUI = require( "teaUI" )
 local Button = require( "button" )
-local Slider = require( "Slider" )
+local Slider = require( "slider" )
+local Textfield = require( "textfield" )
 
 local shiftLeft, shiftRight, bor, band, min, max = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max
 
@@ -54,6 +55,13 @@ myComponent = Slider:create ( myUI:GenID(), 600, 40, 90, 400,  15, band( shiftRi
 function myComponent:onChange ( evt )
 	print( self.value )
 	self.parent.backgroundColor = bor( band( self.parent.backgroundColor, 0x00ffff ), shiftLeft( self.value, 20 ) )
+end
+myUI:addComponent( myComponent )
+
+myComponent = Textfield:create ( myUI:GenID(), 50, 300, 100, 50)
+function myComponent:onChange ( evt )
+	print( self.buffer )
+	self.parent:setTitle("Text Changed!")
 end
 myUI:addComponent( myComponent )
 
