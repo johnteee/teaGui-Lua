@@ -1,9 +1,8 @@
 local ffi = require( "ffi" )
 local sdl = require( "ffi/sdl" )
-local Object = require( "object" )
 local Component = require( "component" )
 
-local shiftLeft, shiftRight, bor, band, min, max = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max
+local min, max = math.min, math.max
 
 local Slider = Component:new{
 	maxValue = 100, value = 50,

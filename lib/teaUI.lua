@@ -78,7 +78,7 @@ function teaUI:loadFont( name )
 end
 
 function teaUI:requireFont( name )
-	local font = require( "" .. name )
+	local font = require( "font/" .. name )
 	local data = ffi.new( "uint8_t[?]", #font, font )
 	local file = sdl.SDL_RWFromConstMem( data, ffi.sizeof(data) )
 	local temp = sdl.SDL_LoadBMP_RW(file, 1)

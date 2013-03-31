@@ -1,7 +1,7 @@
 -- Reference: http://sol.gfxile.net/imgui/ch06.html
 --  Based on: http://sol.gfxile.net/imgui/ch06.cpp
 
-package.path = package.path .. ";./?.lua"
+package.path = package.path .. ";./lib/?.lua"
 local teaUI = require( "teaUI" )
 local Button = require( "button" )
 local Slider = require( "Slider" )
