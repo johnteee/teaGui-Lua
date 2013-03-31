@@ -30,34 +30,12 @@ function Textfield:handleEvent ( evt )
 end
 
 function Textfield:detectEvent ( evt )
-	local xspace, yspace = 8, 8
-	
-	self.parent:checkHitOn( self, self.x - xspace/2, self.y - yspace/2, self.width, self.height )
-	
-	if self.parent:isFocusOn( self ) then
-		self.parent:drawRect( self.x-xspace*3/4, self.y-yspace*3/4, self.width + (xspace*4/4), self.height + (yspace*4/4), 0xff0000 )
-	end
-	
-	if self.parent:isMouseHover( self ) then
-		if self.parent:isMousePress( self ) then
-			self.parent:drawRect( self.x - xspace/2, self.y - yspace/2, self.width + xspace/2, self.height + yspace/2, 0xcccccc )
-		else
-			self.parent:drawRect( self.x - xspace/2, self.y - yspace/2, self.width + xspace/2, self.height + yspace/2, 0xaaaaaa )
-		end
-	else
-		self.parent:drawRect( self.x - xspace/2, self.y - yspace/2, self.width + xspace/2, self.height + yspace/2, 0x777777 )
-	end
-	
-	local str = self.buffer
-	self.parent:drawString( str, self.x, self.y )
-	
-	if self.parent:isFocusOn( self ) and  self.parent:isShowCursorNow()then
-		self.parent:drawString( "_", self.x + (#str)*self.parent.fontWidth, self.y )
-	end
+	self.parent:checkHitOn( self, self.x - self.xspace/2, self.y - self.yspace/2, self.width, self.height )
 	
 	self.parent:checkSwitchFocus( self )
 	
 	local triggerChange = false
+	local str = self.buffer
 	
 	if self.parent:isFocusOn( self ) then
 		if evt.keyEntered == sdl.SDLK_BACKSPACE then
@@ -80,6 +58,29 @@ end
 
 function Textfield:changeBuffer( str )
 	self.buffer = str
+end
+
+function Textfield:paint ()
+	if self.parent:isFocusOn( self ) then
+		self.parent:drawRect( self.x-self.xspace*3/4, self.y-self.yspace*3/4, self.width + (self.xspace*4/4), self.height + (self.yspace*4/4), 0xff0000 )
+	end
+	
+	if self.parent:isMouseHover( self ) then
+		if self.parent:isMousePress( self ) then
+			self.parent:drawRect( self.x - self.xspace/2, self.y - self.yspace/2, self.width + self.xspace/2, self.height + self.yspace/2, 0xcccccc )
+		else
+			self.parent:drawRect( self.x - self.xspace/2, self.y - self.yspace/2, self.width + self.xspace/2, self.height + self.yspace/2, 0xaaaaaa )
+		end
+	else
+		self.parent:drawRect( self.x - self.xspace/2, self.y - self.yspace/2, self.width + self.xspace/2, self.height + self.yspace/2, 0x777777 )
+	end
+	
+	local str = self.buffer
+	self.parent:drawString( str, self.x, self.y )
+	
+	if self.parent:isFocusOn( self ) and  self.parent:isShowCursorNow()then
+		self.parent:drawString( "_", self.x + (#str)*self.parent.fontWidth, self.y )
+	end
 end
 
 function Textfield:onChange ( evt )

@@ -30,17 +30,7 @@ function Image:handleEvent ( evt )
 end
 
 function Image:detectEvent ( evt )
-	local xspace, yspace = 8, 8
-	
-	self.parent:checkHitOn( self, self.x - xspace/2, self.y - yspace/2, self.width, self.height )
-	
-	if self.parent:isFocusOn( self ) then
-		self.parent:drawRect( self.x-xspace*3/4, self.y-yspace*3/4, self.width + (xspace*4/4), self.height + (yspace*4/4), 0xff0000 )
-	end
-	
-	self.parent:drawImage( self.img, self.x, self.y, self.width, self.height )
-	
-	self.parent:checkSwitchFocus( self )
+	self.parent:checkHitOn( self, self.x - self.xspace/2, self.y - self.yspace/2, self.width, self.height )
 	
 	local triggerClick = ( not evt.mouseDown
 		and self.parent:isMouseHover( self )
@@ -59,8 +49,12 @@ function Image:detectEvent ( evt )
 	end
 end
 
-function Image:changeBuffer( str )
-	self.buffer = str
+function Image:paint ()
+	if self.parent:isFocusOn( self ) then
+		self.parent:drawRect( self.x-self.xspace*3/4, self.y-self.yspace*3/4, self.width + (self.xspace*4/4), self.height + (self.yspace*4/4), 0xff0000 )
+	end
+	
+	self.parent:drawImage( self.img, self.x, self.y, self.width, self.height )
 end
 
 function Image:onClick ( evt )

@@ -170,6 +170,15 @@ end
 function teaUI:render()
 	self:drawRect( 0, 0, self.screenWidth, self.screenHeight, self.backgroundColor )
 	self:drawString( self.title, 10, 10 )
+	
+	local el = self.element
+	
+	do
+		for i=1, #el do
+			local comp = el[ i ]
+			comp:paint()
+		end
+	end
 end
 
 function teaUI:refresh()
@@ -269,6 +278,10 @@ function teaUI:releaseFocus()
 end
 
 function teaUI:checkHitOn( comp, x, y, width, height )
+	if comp.canEventOn == false then
+		return
+	end
+	
 	local evt = self:getEvent()
 	if self:regionHit( x, y, width, height ) then
 		self:hoverOn( comp )
@@ -325,8 +338,9 @@ function teaUI:mainLoop()
 		while sdl.SDL_PollEvent( self.rawEvent ) ~= 0 do -- If non-rawEvent, then repaint only
 			self:detectEvent( self.rawEvent ) -- Detect rawEvent
 		end
-		self:render() -- Render
 		self:handleComponent()
+		self:render() -- Render
+		
 		self:refresh()
 		
 		self:sleep( self.loopDelay ) -- Delay

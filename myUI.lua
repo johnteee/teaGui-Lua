@@ -14,7 +14,9 @@ myUI = teaUI:create()
 
 local myComponent
 
-myComponent = Image:create ( myUI:GenID(), 30, 30, myUI:loadBitmap( "res/test.bmp" ), 64, 64 )
+myComponent = Image:create ( myUI:GenID(), 30, 30, myUI:loadBitmap( "res/test.bmp" ) )
+--myComponent.canFocusOn = true
+myComponent.canEventOn = false
 myUI:addComponent( myComponent )
 
 myComponent = Button:create ( myUI:GenID(), 50, 50 )

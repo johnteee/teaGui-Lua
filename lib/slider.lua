@@ -58,26 +58,8 @@ function Slider:handleEvent ( evt )
 end
 
 function Slider:detectEvent ( evt )
-	local xspace, yspace, yvarspace = 8, 8, (self.height/16)/2
-	local ypos = (self.height + 1 - yspace*2) * self.value / self.maxValue
 	
-	self.parent:checkHitOn( self, self.x+xspace, self.y+yspace, self.width, self.height )
-	
-	if self.parent:isFocusOn( self ) then
-		self.parent:drawRect( self.x-xspace/2, self.y-yspace/2, self.width + xspace*3, self.height + yvarspace*2+yspace+1, 0xff0000 )
-	end
-	
-	self.parent:drawRect( self.x,self.y, self.width+xspace*2, self.height+yvarspace*2, 0x777777 )
-	
-	if self.parent:isMouseHover( self ) then
-		if self.parent:isMousePress( self ) then
-			self.parent:drawRect( self.x+xspace, self.y+yspace + ypos, self.width, yvarspace*2, 0x444444 )
-		else
-			self.parent:drawRect( self.x+xspace, self.y+yspace + ypos, self.width, yvarspace*2, 0xffffff )
-		end
-	else
-		self.parent:drawRect( self.x+xspace, self.y+yspace + ypos, self.width, yvarspace*2, 0xaaaaaa )
-	end
+	self.parent:checkHitOn( self, self.x+self.xspace, self.y+self.yspace, self.width, self.height )
 	
 	self.parent:checkSwitchFocus( self )
 	
@@ -97,7 +79,7 @@ function Slider:detectEvent ( evt )
 	end
 	
 	if self.parent:isMousePress( self ) then
-		local mousePosition = evt.mouseY - ( self.y + yspace )
+		local mousePosition = evt.mouseY - ( self.y + self.yspace )
 		mousePosition = max( mousePosition, 0 )
 		mousePosition = min( mousePosition, self.height )
 		local v = mousePosition * self.maxValue / self.height
@@ -111,6 +93,27 @@ function Slider:detectEvent ( evt )
 		return "change", self.value
 	else
 		return "nothing", self.value
+	end
+end
+
+function Slider:paint ()
+	local yvarspace = (self.height/16)/2
+	local ypos = (self.height + 1 - self.yspace*2) * self.value / self.maxValue
+	
+	if self.parent:isFocusOn( self ) then
+		self.parent:drawRect( self.x-self.xspace/2, self.y-self.yspace/2, self.width + self.xspace*3, self.height + yvarspace*2+self.yspace+1, 0xff0000 )
+	end
+	
+	self.parent:drawRect( self.x,self.y, self.width+self.xspace*2, self.height+yvarspace*2, 0x777777 )
+	
+	if self.parent:isMouseHover( self ) then
+		if self.parent:isMousePress( self ) then
+			self.parent:drawRect( self.x+self.xspace, self.y+self.yspace + ypos, self.width, yvarspace*2, 0x444444 )
+		else
+			self.parent:drawRect( self.x+self.xspace, self.y+self.yspace + ypos, self.width, yvarspace*2, 0xffffff )
+		end
+	else
+		self.parent:drawRect( self.x+self.xspace, self.y+self.yspace + ypos, self.width, yvarspace*2, 0xaaaaaa )
 	end
 end
 
