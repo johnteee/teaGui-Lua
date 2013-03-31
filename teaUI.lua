@@ -1,9 +1,9 @@
+package.path = package.path .. ";./?.lua"
 local Object = require ( "object" )
 local ffi = require( "ffi" )
 local sdl = require( "ffi/sdl" )
 local Event = require( "event" )
 local shiftLeft, shiftRight, bor, band, min, max = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max
-local rect, rect2 = ffi.new( "SDL_Rect" ), ffi.new( "SDL_Rect" )
 
 local teaUI = Object:new{
 	--Control
@@ -27,14 +27,16 @@ function teaUI:init()
 	self.screen = sdl.SDL_SetVideoMode( self.screenWidth, self.screenHeight, 32, 0 )
 	self.font = self:requireFont( "font14x24" )
 	self.rawEvent = ffi.new( "SDL_Event" )
+	self.rectFg, self.rectBg = ffi.new( "SDL_Rect" ), ffi.new( "SDL_Rect" )
 	
 	--Control
 	self.event = Event:new()
-	self.event.mouseDown = false
-	self.event.mouseX = 0
-	self.event.mouseY = 0
-	self.event.keyEntered = 0
-	self.event.keyMod = false 
+	local evt = self:getEvent()
+	evt.mouseDown = false
+	evt.mouseX = 0
+	evt.mouseY = 0
+	evt.keyEntered = 0
+	evt.keyMod = false 
 	
 	self.hotItem = 0
 	self.activeItem = 0
@@ -95,10 +97,10 @@ function teaUI:GenID()
 end
 
 function teaUI:drawCharCode( charcode, x, y )
-	rect.x, rect.y, rect.w, rect.h = 0, (charcode - 32) * 24, 14, 24
-	rect2.x, rect2.y, rect2.w, rect2.h = x, y, 14, 24
-	-- sdl.SDL_BlitSurface( self.font, rect, self.screen, rect2 )
-	sdl.SDL_UpperBlit( self.font, rect, self.screen, rect2 )
+	self.rectFg.x, self.rectFg.y, self.rectFg.w, self.rectFg.h = 0, (charcode - 32) * 24, 14, 24
+	self.rectBg.x, self.rectBg.y, self.rectBg.w, self.rectBg.h = x, y, 14, 24
+	-- sdl.SDL_BlitSurface( self.font, self.rectFg, self.screen, self.rectBg )
+	sdl.SDL_UpperBlit( self.font, self.rectFg, self.screen, self.rectBg )
 end
 
 function teaUI:drawString( s, x, y )
@@ -109,15 +111,16 @@ function teaUI:drawString( s, x, y )
 end
 
 function teaUI:drawRect( x, y, w, h, color )
-	rect.x, rect.y, rect.w, rect.h = x, y, w, h
-	sdl.SDL_FillRect( self.screen, rect, color )
+	self.rectFg.x, self.rectFg.y, self.rectFg.w, self.rectFg.h = x, y, w, h
+	sdl.SDL_FillRect( self.screen, self.rectFg, color )
 end
 
 function teaUI:regionHit( x, y, w, h )
-	return ( self.event.mouseX >= x and
-		self.event.mouseY >= y and
-		self.event.mouseX <= x + w and
-		self.event.mouseY <= y + h )
+	local evt = self:getEvent()
+	return ( evt.mouseX >= x and
+		evt.mouseY >= y and
+		evt.mouseX <= x + w and
+		evt.mouseY <= y + h )
 end
 
 function teaUI:guiPrepare()
@@ -125,35 +128,26 @@ function teaUI:guiPrepare()
 end
 
 function teaUI:guiFinish()
-	if not self.event.mouseDown then
+	local evt = self:getEvent()
+	if not evt.mouseDown then
 		self.activeItem = 0
 	elseif self.activeItem == 0 then
 		self.activeItem = -1
 	end
 	
-	if self.event.keyEntered == SDLK_TAB then
+	if evt.keyEntered == SDLK_TAB then
 		self.kbditem = 0
 	end
-	self.event.keyEntered = 0
+	evt.keyEntered = 0
 end
 
 function teaUI:render()
-	local el = self.element
 	self:drawRect( 0, 0, self.screenWidth, self.screenHeight, self.backgroundColor )
-	
-	self:guiPrepare()
-	do
-		for i=1, #el do
-			local comp = el[ i ]
-			comp:handleEvent( self.event )
-		end
-	end
-	self:guiFinish()
-	
 	self:drawString( "0DDTest1238919283891289319823123", 10, 10 )
-	
+end
+
+function teaUI:refresh()
 	sdl.SDL_UpdateRect( self.screen, 0, 0, self.screenWidth, self.screenHeight )
-	self:sleep( 10 )
 end
 
 function teaUI:randomBgColor()
@@ -169,23 +163,24 @@ function teaUI:sleep( msec )
 end
 
 function teaUI:detectEvent( rawEvent )
-	local evt, key, mod = rawEvent.type, rawEvent.key.keysym.sym, rawEvent.key.keysym.mod
+	local evttype, key, mod = rawEvent.type, rawEvent.key.keysym.sym, rawEvent.key.keysym.mod
 	local motion, button = rawEvent.motion, rawEvent.button.button
+	local evt = self:getEvent()
 	--System
-	if evt == sdl.SDL_QUIT then
+	if evttype == sdl.SDL_QUIT then
 		self.isShoudExit = true
 	--Mouse
-	elseif evt == sdl.SDL_MOUSEMOTION then
-		self.event.mouseX, self.event.mouseY = motion.x, motion.y
-	elseif evt == sdl.SDL_MOUSEBUTTONDOWN and button == 1 then
-		self.event.mouseDown = true
-	elseif evt == sdl.SDL_MOUSEBUTTONUP and button == 1 then
-		self.event.mouseDown = false
+	elseif evttype == sdl.SDL_MOUSEMOTION then
+		evt.mouseX, evt.mouseY = motion.x, motion.y
+	elseif evttype == sdl.SDL_MOUSEBUTTONDOWN and button == 1 then
+		evt.mouseDown = true
+	elseif evttype == sdl.SDL_MOUSEBUTTONUP and button == 1 then
+		evt.mouseDown = false
 	--KeyBoard
-	elseif evt == sdl.SDL_KEYDOWN then
-		self.event.keyEntered = key
-		self.event.keyMod = mod
-	elseif evt == sdl.SDL_KEYUP then
+	elseif evttype == sdl.SDL_KEYDOWN then
+		evt.keyEntered = key
+		evt.keyMod = mod
+	elseif evttype == sdl.SDL_KEYUP then
 		if key == sdl.SDLK_ESCAPE then
 			self.isShoudExit = true
 		elseif key == sdl.SDLK_F1 then
@@ -194,12 +189,103 @@ function teaUI:detectEvent( rawEvent )
 	end
 end
 
+function teaUI:isMouseHover( theID )
+	return self.hotItem == theID
+end
+
+function teaUI:isMousePress( theID )
+	return self.activeItem == theID
+end
+
+function teaUI:isFocusOn( theID )
+	return self.kbdItem == theID
+end
+
+function teaUI:isNoOneFocusOn()
+	return self:isFocusOn( 0 )
+end
+
+function teaUI:isNoOnePressed()
+	return self:isMousePress( 0 )
+end
+
+function teaUI:getLastWidget()
+	return self.lastWidget
+end
+
+function teaUI:hoverOn( theID )
+	self.hotItem = theID
+end
+
+function teaUI:focusOn( theID )
+	self.kbdItem = theID
+end
+
+function teaUI:pressOn( theID )
+	self.activeItem = theID
+end
+
+function teaUI:releaseFocus()
+	self:focusOn( 0 )
+end
+
+function teaUI:checkHitOn( theID, x, y, width, height )
+	local evt = self:getEvent()
+	if self:regionHit( x, y, width, height ) then
+		self:hoverOn( theID )
+		if self:isNoOnePressed() and evt.mouseDown then
+			self:pressOn( theID )
+			self:focusOn( theID )
+		end
+	end
+	
+	if self:isNoOneFocusOn() then
+		self:focusOn( theID )
+	end
+end
+
+function teaUI:checkSwitchFocus( theID )
+	local evt = self:getEvent()
+	if self:isFocusOn( theID ) then
+		if evt.keyEntered == sdl.SDLK_TAB then
+				self:releaseFocus()
+				if band( evt.keyMod, sdl.KMOD_SHIFT ) then
+					self:focusOn( self:getLastWidget() )
+				end
+				evt.keyEntered = 0
+		end
+	end
+	
+	self.lastWidget = theID;
+end
+
+function teaUI:getEvent()
+	return self.event
+end
+
+function teaUI:handleComponent()
+	local el, evt = self.element, self:getEvent()
+	
+	self:guiPrepare()
+	do
+		for i=1, #el do
+			local comp = el[ i ]
+			comp:handleEvent( evt )
+		end
+	end
+	self:guiFinish()
+end
+
 function teaUI:mainLoop()
 	while not self.isShoudExit do
 		while sdl.SDL_PollEvent( self.rawEvent ) ~= 0 do -- If non-rawEvent, then repaint only
 			self:detectEvent( self.rawEvent ) -- Detect rawEvent
 		end
 		self:render() -- Render
+		self:handleComponent()
+		self:refresh()
+		
+		self:sleep( 10 ) -- Delay
 	end
 	
 	sdl.SDL_Quit() -- Do Exit

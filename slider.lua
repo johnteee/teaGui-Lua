@@ -24,75 +24,75 @@ end
 
 function Slider:handleEvent ( evt )
 	local eventType, value = self:detectEvent( evt )
+	
+	if( eventType ~= "nothing") then
+		self.parent:focusOn( self.ID )
+	end
+	
 	if( eventType == "change") then
 		self.value = value
-		self:onChange ()
+		self:onChange ( evt )
 	end
 end
 
 function Slider:detectEvent ( evt )
-	local xspace, yspace = 8, (self.height/16)/2
-	local ypos = (self.height + 1 - 16) * self.value / self.maxValue
+	local xspace, yspace, yvarspace = 8, 8, (self.height/16)/2
+	local ypos = (self.height + 1 - yspace*2) * self.value / self.maxValue
 	
-	if self.parent:regionHit( self.x+8, self.y+8, self.width, self.height ) then
-		self.parent.hotItem = self.ID
-		if self.parent.activeItem == 0 and evt.mouseDown then
-			self.parent.activeItem = self.ID
+	self.parent:checkHitOn( self.ID, self.x+xspace, self.y+yspace, self.width, self.height )
+	
+	if self.parent:isFocusOn( self.ID ) then
+		self.parent:drawRect( self.x-xspace/2, self.y-yspace/2, self.width + xspace*3, self.height + yvarspace*2+yspace+1, 0xff0000 )
+	end
+	
+	self.parent:drawRect( self.x,self.y, self.width+xspace*2, self.height+yvarspace*2, 0x777777 )
+	
+	if self.parent:isMouseHover( self.ID ) then
+		if self.parent:isMousePress( self.ID ) then
+			self.parent:drawRect( self.x+xspace, self.y+yspace + ypos, self.width, yvarspace*2, 0x444444 )
+		else
+			self.parent:drawRect( self.x+xspace, self.y+yspace + ypos, self.width, yvarspace*2, 0xffffff )
 		end
-	end
-
-	if self.parent.kbdItem == 0 then
-		self.parent.kbdItem = self.ID;
-	end
-
-	if self.parent.kbdItem == self.ID then
-		self.parent:drawRect( self.x-4, self.y-4, self.width + 24, self.height + 25, 0xff0000 )
-	end
-	
-	self.parent:drawRect( self.x,self.y, self.width+xspace*2, self.height+yspace*2, 0x777777 )
-	
-	if self.parent.activeItem == self.ID or self.parent.hotItem == self.ID then
-		self.parent:drawRect( self.x+8, self.y+8 + ypos, self.width, yspace*2, 0xffffff )
 	else
-		self.parent:drawRect( self.x+8, self.y+8 + ypos, self.width, yspace*2, 0xaaaaaa )
+		self.parent:drawRect( self.x+xspace, self.y+yspace + ypos, self.width, yvarspace*2, 0xaaaaaa )
 	end
 	
-	if self.parent.kbdItem == self.ID then
-		if evt.keyEntered == sdl.SDLK_TAB then
-			self.parent.kbdItem = 0
-			if band( evt.keyMod, sdl.KMOD_SHIFT ) then
-				self.parent.kbdItem = self.parent.lastWidget;
-			end
-			evt.keyEntered = 0;
-		elseif evt.keyEntered == sdl.SDLK_UP then
+	self.parent:checkSwitchFocus( self.ID )
+	
+	local triggerChange = false
+	if self.parent:isFocusOn( self.ID ) then
+		if evt.keyEntered == sdl.SDLK_UP then
 			if self.value > 0 then
 				self.value = self.value - 1
-				return "change", self.value
+				triggerChange = true
 			end
 		elseif evt.keyEntered == sdl.SDLK_DOWN then
 			if self.value < self.maxValue then
 				self.value = self.value + 1
-				return "change", self.value
+				triggerChange = true
 			end
 		end
 	end
 	
-	self.parent.lastWidget = self.ID
-	
-	if self.parent.activeItem == self.ID then
-		local mousePosition = evt.mouseY - ( self.y + 8 )
+	if self.parent:isMousePress( self.ID ) then
+		local mousePosition = evt.mouseY - ( self.y + yspace )
 		mousePosition = max( mousePosition, 0 )
 		mousePosition = min( mousePosition, self.height )
 		local v = mousePosition * self.maxValue / self.height
 		if v ~= self.value then
-			return "change", v
+			self.value = v
+			triggerChange = true
 		end
 	end
 	
-	return "nothing", self.value
+	if triggerChange == true then
+		return "change", self.value
+	else
+		return "nothing", self.value
+	end
 end
 
-function Slider:onChange ()
+function Slider:onChange ( evt )
 end
 
 return Slider

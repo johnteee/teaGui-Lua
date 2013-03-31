@@ -21,65 +21,63 @@ end
 
 function Button:handleEvent ( evt )
 	local eventType = self:detectEvent( evt )
+	
+	if( eventType ~= "nothing") then
+		self.parent:focusOn( self.ID )
+	end
+	
 	if( eventType == "click") then
-		self:onClick ()
+		self:onClick ( evt )
 	end
 end
 
 function Button:detectEvent ( evt )
-	if self.parent:regionHit( self.x, self.y, 64, 48 ) then
-		self.parent.hotItem = self.ID
-		if self.parent.activeItem == 0 and evt.mouseDown then
-			self.parent.activeItem = self.ID
-		end
-	end
+	local xspace, yspace, xfloat, yfloat, shadowRate = 8, 8, 20, 20, 0.15
 	
-	if self.parent.kbdItem == 0 then
-		self.parent.kbdItem = self.ID
-	end
+	self.parent:checkHitOn( self.ID, self.x, self.y, self.width, self.height )
 	
-	if self.parent.kbdItem == self.ID then
-		self.parent:drawRect( self.x - 6, self.y - 6, self.width + 20, self.height + 20, 0xff0000 )
-	end
-	
-	self.parent:drawRect( self.x + 8, self.y + 8, self.width, self.height, 0 )
-	
-	if self.parent.hotItem == self.ID then
-		if self.parent.activeItem == self.ID then
-			self.parent:drawRect( self.x + 2, self.y + 2, self.width, self.height, 0xffffff )
+	if self.parent:isMouseHover( self.ID ) then
+		if self.parent:isMousePress( self.ID ) then
+			if self.parent:isFocusOn( self.ID ) then
+				self.parent:drawRect( self.x - xspace + xfloat*(1 + shadowRate/2), self.y - yspace + yfloat*(1 + shadowRate/2), self.width + xspace*3 + xfloat*shadowRate, self.height + yspace*3 + yfloat*shadowRate, 0xff0000 )
+			end
+			self.parent:drawRect( self.x + xspace + xfloat*(1 + shadowRate/2), self.y + yspace + yfloat*(1 + shadowRate/2), self.width, self.height, 0 )
+			self.parent:drawRect( self.x + xfloat*(1 + shadowRate/2), self.y + yfloat*(1 + shadowRate/2), self.width, self.height, 0xffffff )
 		else
+			if self.parent:isFocusOn( self.ID ) then
+				self.parent:drawRect( self.x - xspace + xfloat*(1 + shadowRate/2), self.y - yspace + yfloat*(1 + shadowRate/2), self.width + xspace*3 + xfloat*shadowRate, self.height + yspace*3 + yfloat*shadowRate, 0xff0000 )
+			end
+			self.parent:drawRect( self.x + xfloat*(1 + shadowRate/2), self.y + yfloat*(1 + shadowRate/2), self.width + xspace + xfloat*shadowRate, self.height + yspace + yfloat*shadowRate, 0 )
 			self.parent:drawRect( self.x, self.y, self.width, self.height, 0xffffff )
 		end
 	else
+		if self.parent:isFocusOn( self.ID ) then
+			self.parent:drawRect( self.x - xspace + xfloat*(1 + shadowRate/2), self.y - yspace + yfloat*(1 + shadowRate/2), self.width + xspace*3 + xfloat*shadowRate, self.height + yspace*3 + yfloat*shadowRate, 0xff0000 )
+		end
+		self.parent:drawRect( self.x + xfloat*(1 + shadowRate/2), self.y + yfloat*(1 + shadowRate/2), self.width + xspace + xfloat*shadowRate, self.height + yspace + yfloat*shadowRate, 0 )
 		self.parent:drawRect( self.x, self.y, self.width, self.height, 0xaaaaaa )
 	end
 	
-	if self.parent.kbdItem == self.ID then
-		if evt.keyEntered == sdl.SDLK_TAB then
-			self.parent.kbdItem = 0
-			if band( evt.keyMod, sdl.KMOD_SHIFT ) then
-				self.parent.kbdItem = self.parent.lastWidget
-			end
-			evt.keyEntered = 0
-		elseif evt.keyEntered == sdl.SDLK_RETURN then
-			return "click"
+	self.parent:checkSwitchFocus( self.ID )
+	
+	local triggerClick = ( not evt.mouseDown
+		and self.parent:isMouseHover( self.ID )
+		and self.parent:isMousePress( self.ID ) )
+	
+	if self.parent:isFocusOn( self.ID ) then
+		if evt.keyEntered == sdl.SDLK_RETURN then
+			triggerClick = true
 		end
 	end
 	
-	self.parent.lastWidget = self.ID;
-	
-	local triggerClick = ( not evt.mouseDown
-		and self.parent.hotItem == self.ID
-		and self.parent.activeItem == self.ID )
-	
 	if( triggerClick ) then
 		return "click"
+	else
+		return "nothing"
 	end
-	
-	return "nothing"
 end
 
-function Button:onClick ()
+function Button:onClick ( evt )
 end
 
 return Button
