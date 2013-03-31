@@ -6,12 +6,16 @@ local teaUI = require( "teaUI" )
 local Button = require( "button" )
 local Slider = require( "slider" )
 local Textfield = require( "textfield" )
+local Image = require( "image" )
 
 local shiftLeft, shiftRight, bor, band, min, max = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max
 
-myUI = teaUI:new()
+myUI = teaUI:create()
 
 local myComponent
+
+myComponent = Image:create ( myUI:GenID(), 30, 30, myUI:loadBitmap( "res/test.bmp" ), 64, 64 )
+myUI:addComponent( myComponent )
 
 myComponent = Button:create ( myUI:GenID(), 50, 50 )
 function myComponent:onClick ( evt )
@@ -32,8 +36,16 @@ end
 myUI:addComponent( myComponent )
 
 myComponent = Button:create ( myUI:GenID(), 150, 150 )
+myComponent.canFocusOn = false
 function myComponent:onClick ( evt )
 	self.parent:quit()
+end
+myUI:addComponent( myComponent )
+
+myComponent = Textfield:create ( myUI:GenID(), 50, 300, 300, 25)
+function myComponent:onChange ( evt )
+	print( self.buffer )
+	self.parent:setTitle("Text Changed!")
 end
 myUI:addComponent( myComponent )
 
@@ -55,13 +67,6 @@ myComponent = Slider:create ( myUI:GenID(), 600, 40, 90, 400,  15, band( shiftRi
 function myComponent:onChange ( evt )
 	print( self.value )
 	self.parent.backgroundColor = bor( band( self.parent.backgroundColor, 0x00ffff ), shiftLeft( self.value, 20 ) )
-end
-myUI:addComponent( myComponent )
-
-myComponent = Textfield:create ( myUI:GenID(), 50, 300, 100, 50)
-function myComponent:onChange ( evt )
-	print( self.buffer )
-	self.parent:setTitle("Text Changed!")
 end
 myUI:addComponent( myComponent )
 
