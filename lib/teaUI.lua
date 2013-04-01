@@ -4,7 +4,7 @@ local ffi = require( "ffi" )
 local sdl = require( "ffi/sdl" )
 local Event = require( "event" )
 local Component = require( "component" )
-local shiftLeft, shiftRight, bor, band, min, max = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max
+local shiftLeft, shiftRight, bor, band, min, max, fmod = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max, math.fmod
 
 local teaUI = Object:extend{
 	--Control
@@ -44,6 +44,7 @@ function teaUI:init()
 	sdl.SDL_EnableKeyRepeat( sdl.SDL_DEFAULT_REPEAT_DELAY, sdl.SDL_DEFAULT_REPEAT_INTERVAL )
 	sdl.SDL_EnableUNICODE(1)
 	self.screen = sdl.SDL_SetVideoMode( self.screenWidth, self.screenHeight, 32, 0 )
+	self.renderer = sdl.SDL_CreateSoftwareRenderer( self.screen )
 	self.font = self:requireFont( "font14x24" )
 	self.rawEvent = ffi.new( "SDL_Event" )
 	self.rectFg, self.rectBg = ffi.new( "SDL_Rect" ), ffi.new( "SDL_Rect" )
@@ -146,6 +147,16 @@ end
 function teaUI:drawRect( x, y, w, h, color )
 	self.rectFg.x, self.rectFg.y, self.rectFg.w, self.rectFg.h = x, y, w, h
 	sdl.SDL_FillRect( self.screen, self.rectFg, color )
+end
+
+function teaUI:drawRectWire( x, y, w, h, color, alpha)
+	self.rectFg.x, self.rectFg.y, self.rectFg.w, self.rectFg.h = x, y, w, h
+	local r, g, b =
+		shiftRight( color, 8 + 8 ), shiftRight( fmod( color, (256 * 256) ) , 8 ),
+		fmod( color, (256) )
+	alpha = alpha or 0.1
+	sdl.SDL_SetRenderDrawColor( self.renderer, r, g, b, alpha)
+	sdl.SDL_RenderDrawRect( self.renderer, self.rectFg )
 end
 
 function teaUI:regionHit( x, y, w, h )

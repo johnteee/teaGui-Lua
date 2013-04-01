@@ -60,9 +60,8 @@ function Textfield:changeBuffer( str )
 end
 
 function Textfield:paint ()
-	if self.parent:isFocusOn( self ) then
-		self.parent:drawRect( self.x-self.xspace*3/4, self.y-self.yspace*3/4, self.width + (self.xspace*4/4), self.height + (self.yspace*4/4), 0xff0000 )
-	end
+	self:setOutRegion( self.x-self.xspace*3/4, self.y-self.yspace*3/4, self.width + (self.xspace*4/4), self.height + (self.yspace*4/4) )
+	self:super().paint( self )
 	
 	if self.parent:isMouseHover( self ) then
 		if self.parent:isMousePress( self ) then

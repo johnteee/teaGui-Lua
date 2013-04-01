@@ -61,8 +61,6 @@ function Slider:detectEvent ( evt )
 	self.hitRegion.x, self.hitRegion.y, self.hitRegion.width, self.hitRegion.height =
 	self.x+self.xspace, self.y+self.yspace, self.width, self.height
 	
-	self.parent:checkSwitchFocus( self )
-	
 	local triggerChange = false
 	if self.parent:isFocusOn( self ) then
 		if evt.keyEntered == sdl.SDLK_UP then
@@ -100,9 +98,9 @@ function Slider:paint ()
 	local yvarspace = (self.height/16)/2
 	local ypos = (self.height + 1 - self.yspace*2) * self.value / self.maxValue
 	
-	if self.parent:isFocusOn( self ) then
-		self.parent:drawRect( self.x-self.xspace/2, self.y-self.yspace/2, self.width + self.xspace*3, self.height + yvarspace*2+self.yspace+1, 0xff0000 )
-	end
+	self:setOutRegion( self.x-self.xspace/2, self.y-self.yspace/2, self.width + self.xspace*3, self.height + yvarspace*2+self.yspace+1 )
+	
+	self:super().paint( self )
 	
 	self.parent:drawRect( self.x,self.y, self.width+self.xspace*2, self.height+yvarspace*2, 0x777777 )
 	

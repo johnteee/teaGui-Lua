@@ -22,16 +22,13 @@ function Image:handleEvent ( evt )
 end
 
 function Image:detectEvent ( evt )
-	self.hitRegion.x, self.hitRegion.y, self.hitRegion.width, self.hitRegion.height =
-	self.x - self.xspace/2, self.y - self.yspace/2, self.width, self.height
+	self:setHitRegion( self.x - self.xspace/2, self.y - self.yspace/2, self.width, self.height )
 	
 	return self:super().detectEvent( self, evt )
 end
 
 function Image:paint ()
-	if self.parent:isFocusOn( self ) then
-		self.parent:drawRect( self.x-self.xspace*3/4, self.y-self.yspace*3/4, self.width + (self.xspace*4/4), self.height + (self.yspace*4/4), 0xff0000 )
-	end
+	self:super().paint( self )
 	
 	self.parent:drawImage( self.img, self.x, self.y, self.width, self.height )
 end
