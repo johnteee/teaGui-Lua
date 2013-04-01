@@ -15,13 +15,18 @@ myUI = teaUI:create()
 local myComponent
 
 myComponent = Image:create ( myUI:GenID(), 30, 30, myUI:loadBitmap( "res/test.bmp" ) )
---myComponent.canFocusOn = true
-myComponent.canEventOn = false
+myComponent.canFocusOn = true
+--myComponent.canEventOn = false
+function myComponent:onClick ( evt )
+	self.parent:randomBgColor()
+	print( 0 )
+end
 myUI:addComponent( myComponent )
 
 myComponent = Button:create ( myUI:GenID(), 50, 50 )
 function myComponent:onClick ( evt )
 	self.parent:randomBgColor()
+	print( 1 )
 end
 myUI:addComponent( myComponent )
 
@@ -32,13 +37,19 @@ end
 myUI:addComponent( myComponent )
 
 myComponent = Button:create ( myUI:GenID(), 50, 150 )
-function myComponent:onClick ( evt )
-	self.parent:randomBgColor()
+function myComponent:onMouseDown ( evt )
+	--self.parent:randomBgColor()
+	if self.parent:isMousePress( self ) then
+		self.x, self.y = evt.mouseX - self.width/2, evt.mouseY - self.height/2
+		local super, myself = self.super, self
+		print(myself.x)
+		self:super().paint( self )
+	end
 end
 myUI:addComponent( myComponent )
 
 myComponent = Button:create ( myUI:GenID(), 150, 150 )
-myComponent.canFocusOn = false
+--myComponent.canFocusOn = false
 function myComponent:onClick ( evt )
 	self.parent:quit()
 end

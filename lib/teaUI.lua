@@ -6,7 +6,7 @@ local Event = require( "event" )
 local Component = require( "component" )
 local shiftLeft, shiftRight, bor, band, min, max = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max
 
-local teaUI = Object:new{
+local teaUI = Object:extend{
 	--Control
 	event = nil,
 	
@@ -23,7 +23,12 @@ local teaUI = Object:new{
 	screenWidth = 800, screenHeight = 600,
 	backgroundColor = 0x77,
 	fontWidth = 14, fontHeight = 24,
-	title = "This is a test"
+	title = "This is a test",
+	
+	--Platform
+	platformConst = {
+		KEYRETURN
+	}
 }
 
 function teaUI:create()
@@ -70,6 +75,9 @@ function teaUI:init()
 	self.fontWidth = 14
 	self.fontHeight = 24
 	self.title = "This is a test"
+	
+	--Platform
+	self.platformConst.KEYRETURN = sdl.SDLK_RETURN
 	
 	--Element
 	self:initElement()
@@ -209,6 +217,7 @@ function teaUI:detectEvent( rawEvent )
 	local evttype, key, keymod, keyunicode = rawEvent.type, rawEvent.key.keysym.sym, rawEvent.key.keysym.mod, rawEvent.key.keysym.unicode
 	local motion, button = rawEvent.motion, rawEvent.button.button
 	local evt = self:getEvent()
+	
 	--System
 	if evttype == sdl.SDL_QUIT then
 		self.isShoudExit = true
@@ -233,6 +242,8 @@ function teaUI:detectEvent( rawEvent )
 	elseif evttype == sdl.SDL_KEYUP then
 		
 	end
+	
+	self:handleComponent()
 end
 
 function teaUI:isMouseHover( comp )
@@ -338,7 +349,6 @@ function teaUI:mainLoop()
 		while sdl.SDL_PollEvent( self.rawEvent ) ~= 0 do -- If non-rawEvent, then repaint only
 			self:detectEvent( self.rawEvent ) -- Detect rawEvent
 		end
-		self:handleComponent()
 		self:render() -- Render
 		
 		self:refresh()

@@ -1,9 +1,9 @@
 local sdl = require( "ffi/sdl" )
 local Component = require( "component" )
 
-local Button = Component:new{
+local Button = Component:extend{
 	width = 64, height = 48,
-	xfloat = 20, yfloat = 20
+	xfloat = 2, yfloat = 2
 }
 
 function Button:create ( ID, x, y, width, height )
@@ -17,37 +17,14 @@ function Button:create ( ID, x, y, width, height )
 end
 
 function Button:handleEvent ( evt )
-	local eventType = self:detectEvent( evt )
-	
-	if( eventType ~= "nothing") then
-		self.parent:focusOn( self )
-	end
-	
-	if( eventType == "click") then
-		self:onClick ( evt )
-	end
+	self:super().handleEvent ( self, evt )
 end
 
 function Button:detectEvent ( evt )
-	self.parent:checkHitOn( self, self.x, self.y, self.width, self.height )
+	self.hitRegion.x, self.hitRegion.y, self.hitRegion.width, self.hitRegion.height =
+	self.x, self.y, self.width, self.height
 	
-	self.parent:checkSwitchFocus( self )
-	
-	local triggerClick = ( not evt.mouseDown
-		and self.parent:isMouseHover( self )
-		and self.parent:isMousePress( self ) )
-	
-	if self.parent:isFocusOn( self ) then
-		if evt.keyEntered == sdl.SDLK_RETURN then
-			triggerClick = true
-		end
-	end
-	
-	if( triggerClick ) then
-		return "click"
-	else
-		return "nothing"
-	end
+	return self:super().detectEvent( self, evt )
 end
 
 function Button:paint ()
@@ -74,9 +51,6 @@ function Button:paint ()
 		self.parent:drawRect( self.x + self.xfloat*(1 + shadowRate/2), self.y + self.yfloat*(1 + shadowRate/2), self.width + self.xspace + self.xfloat*shadowRate, self.height + self.yspace + self.yfloat*shadowRate, 0 )
 		self.parent:drawRect( self.x, self.y, self.width, self.height, 0xaaaaaa )
 	end
-end
-
-function Button:onClick ( evt )
 end
 
 return Button

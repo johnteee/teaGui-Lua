@@ -1,7 +1,7 @@
 local sdl = require( "ffi/sdl" )
 local Component = require( "component" )
 
-local Image = Component:new{
+local Image = Component:extend{
 	width = 64, height = 48,
 	img = nil, canFocusOn = false
 }
@@ -18,35 +18,14 @@ function Image:create ( ID, x, y, img, width, height )
 end
 
 function Image:handleEvent ( evt )
-	local eventType = self:detectEvent( evt )
-	
-	if( eventType ~= "nothing") then
-		self.parent:focusOn( self )
-	end
-	
-	if( eventType == "click") then
-		self:onClick ( evt )
-	end
+	self:super().handleEvent ( self, evt )
 end
 
 function Image:detectEvent ( evt )
-	self.parent:checkHitOn( self, self.x - self.xspace/2, self.y - self.yspace/2, self.width, self.height )
+	self.hitRegion.x, self.hitRegion.y, self.hitRegion.width, self.hitRegion.height =
+	self.x - self.xspace/2, self.y - self.yspace/2, self.width, self.height
 	
-	local triggerClick = ( not evt.mouseDown
-		and self.parent:isMouseHover( self )
-		and self.parent:isMousePress( self ) )
-	
-	if self.parent:isFocusOn( self ) then
-		if evt.keyEntered == sdl.SDLK_RETURN then
-			triggerClick = true
-		end
-	end
-	
-	if( triggerClick ) then
-		return "click"
-	else
-		return "nothing"
-	end
+	return self:super().detectEvent( self, evt )
 end
 
 function Image:paint ()
@@ -55,9 +34,6 @@ function Image:paint ()
 	end
 	
 	self.parent:drawImage( self.img, self.x, self.y, self.width, self.height )
-end
-
-function Image:onClick ( evt )
 end
 
 return Image

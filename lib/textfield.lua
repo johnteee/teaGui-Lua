@@ -1,7 +1,7 @@
 local sdl = require( "ffi/sdl" )
 local Component = require( "component" )
 local band = bit.band
-local Textfield = Component:new{
+local Textfield = Component:extend{
 	width = 64, height = 48,
 	buffer = "Text"
 }
@@ -30,9 +30,8 @@ function Textfield:handleEvent ( evt )
 end
 
 function Textfield:detectEvent ( evt )
-	self.parent:checkHitOn( self, self.x - self.xspace/2, self.y - self.yspace/2, self.width, self.height )
-	
-	self.parent:checkSwitchFocus( self )
+	self.hitRegion.x, self.hitRegion.y, self.hitRegion.width, self.hitRegion.height =
+	self.x - self.xspace/2, self.y - self.yspace/2, self.width, self.height
 	
 	local triggerChange = false
 	local str = self.buffer
@@ -51,9 +50,9 @@ function Textfield:detectEvent ( evt )
 	
 	if( triggerChange ) then
 		return "change"
-	else
-		return "nothing"
 	end
+	
+	return self:super().detectEvent( self, evt )
 end
 
 function Textfield:changeBuffer( str )

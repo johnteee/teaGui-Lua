@@ -27,7 +27,7 @@ end
 myUI:addComponent( myComponent )
 ]]--
 
-local Slider = Component:new{
+local Slider = Component:extend{
 	maxValue = 100, value = 50,
 	width = 16, height = 255
 }
@@ -58,8 +58,8 @@ function Slider:handleEvent ( evt )
 end
 
 function Slider:detectEvent ( evt )
-	
-	self.parent:checkHitOn( self, self.x+self.xspace, self.y+self.yspace, self.width, self.height )
+	self.hitRegion.x, self.hitRegion.y, self.hitRegion.width, self.hitRegion.height =
+	self.x+self.xspace, self.y+self.yspace, self.width, self.height
 	
 	self.parent:checkSwitchFocus( self )
 	
@@ -91,9 +91,9 @@ function Slider:detectEvent ( evt )
 	
 	if triggerChange == true then
 		return "change", self.value
-	else
-		return "nothing", self.value
 	end
+	
+	return self:super().detectEvent( self, evt ), self.value
 end
 
 function Slider:paint ()
