@@ -1,5 +1,3 @@
-local ffi = require( "ffi" )
-local sdl = require( "ffi/sdl" )
 local Component = require( "component" )
 
 local min, max = math.min, math.max
@@ -63,12 +61,12 @@ function Slider:detectEvent ( evt )
 	
 	local triggerChange = false
 	if self.parent:isFocusOn( self ) then
-		if evt.keyEntered == sdl.SDLK_UP then
+		if evt.keyEntered == self.parent.platformConst.KEYUP then
 			if self.value > 0 then
 				self.value = self.value - 1
 				triggerChange = true
 			end
-		elseif evt.keyEntered == sdl.SDLK_DOWN then
+		elseif evt.keyEntered == self.parent.platformConst.KEYDOWN then
 			if self.value < self.maxValue then
 				self.value = self.value + 1
 				triggerChange = true

@@ -27,7 +27,7 @@ local teaUI = Object:extend{
 	
 	--Platform
 	platformConst = {
-		KEYRETURN
+		KEYRETURN, KEYUP, KEYDOWN, BACKSPACE
 	}
 }
 
@@ -79,6 +79,9 @@ function teaUI:init()
 	
 	--Platform
 	self.platformConst.KEYRETURN = sdl.SDLK_RETURN
+	self.platformConst.KEYUP = sdl.SDLK_UP
+	self.platformConst.KEYDOWN = sdl.SDLK_DOWN
+	self.platformConst.BACKSPACE = sdl.SDLK_BACKSPACE
 	
 	--Element
 	self:initElement()
@@ -146,17 +149,27 @@ end
 
 function teaUI:drawRect( x, y, w, h, color )
 	self.rectFg.x, self.rectFg.y, self.rectFg.w, self.rectFg.h = x, y, w, h
-	sdl.SDL_FillRect( self.screen, self.rectFg, color )
+	
+	r, g, b, alpha = self:getRGBA( color, alpha )
+	sdl.SDL_SetRenderDrawColor( self.renderer, r, g, b, alpha)
+	sdl.SDL_RenderFillRect( self.renderer, self.rectFg )
 end
 
 function teaUI:drawRectWire( x, y, w, h, color, alpha)
 	self.rectFg.x, self.rectFg.y, self.rectFg.w, self.rectFg.h = x, y, w, h
+	
+	r, g, b, alpha = self:getRGBA( color, alpha )
+	sdl.SDL_SetRenderDrawColor( self.renderer, r, g, b, alpha)
+	sdl.SDL_RenderDrawRect( self.renderer, self.rectFg )
+end
+
+function teaUI:getRGBA( color, alpha )
 	local r, g, b =
 		shiftRight( color, 8 + 8 ), shiftRight( fmod( color, (256 * 256) ) , 8 ),
 		fmod( color, (256) )
 	alpha = alpha or 0.1
-	sdl.SDL_SetRenderDrawColor( self.renderer, r, g, b, alpha)
-	sdl.SDL_RenderDrawRect( self.renderer, self.rectFg )
+	
+	return r, g, b, alpha
 end
 
 function teaUI:regionHit( x, y, w, h )
@@ -247,7 +260,7 @@ function teaUI:detectEvent( rawEvent )
 			evt.keyChar = band(keyunicode, 0x7F);
 		end
 		
-		if key == sdl.SDLK_q and band( evt.keyMod, sdl.KMOD_CTRL )  then
+		if key == sdl.SDLK_ESCAPE  then
 			self.isShoudExit = true
 		end
 	elseif evttype == sdl.SDL_KEYUP then

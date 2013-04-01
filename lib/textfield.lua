@@ -1,4 +1,3 @@
-local sdl = require( "ffi/sdl" )
 local Component = require( "component" )
 local band = bit.band
 local Textfield = Component:extend{
@@ -37,7 +36,7 @@ function Textfield:detectEvent ( evt )
 	local str = self.buffer
 	
 	if self.parent:isFocusOn( self ) then
-		if evt.keyEntered == sdl.SDLK_BACKSPACE then
+		if evt.keyEntered == self.parent.platformConst.BACKSPACE then
 			if #str > 0 then
 				self:changeBuffer( string.sub(str, 1, -1 - 1) )
 				triggerChange = true

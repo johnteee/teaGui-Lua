@@ -1,4 +1,3 @@
-local sdl = require( "ffi/sdl" )
 local Component = require( "component" )
 
 local Button = Component:extend{
