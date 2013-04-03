@@ -2,7 +2,7 @@ teaGui-Lua
 ==========
 
 What is teaGui?
-It's Based on Imgui in lua, and implement with OO
+It's based on Imgui in lua, and implemented with OO
 
 
 

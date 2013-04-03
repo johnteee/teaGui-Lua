@@ -19,10 +19,6 @@ end
 function Textfield:handleEvent ( evt )
 	local eventType = self:detectEvent( evt )
 	
-	if( eventType ~= "nothing") then
-		self.parent:focusOn( self )
-	end
-	
 	if( eventType == "change") then
 		self:onChange ( evt )
 	end
@@ -36,7 +32,7 @@ function Textfield:detectEvent ( evt )
 	local str = self.buffer
 	
 	if self.parent:isFocusOn( self ) then
-		if evt.keyEntered == self.parent.platformConst.BACKSPACE then
+		if self.parent:isKeyEntered( evt, self.parent:getPlatformConst().BACKSPACE ) then
 			if #str > 0 then
 				self:changeBuffer( string.sub(str, 1, -1 - 1) )
 				triggerChange = true

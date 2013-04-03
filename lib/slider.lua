@@ -45,10 +45,6 @@ end
 function Slider:handleEvent ( evt )
 	local eventType, value = self:detectEvent( evt )
 	
-	if( eventType ~= "nothing") then
-		self.parent:focusOn( self )
-	end
-	
 	if( eventType == "change") then
 		self.value = value
 		self:onChange ( evt )
@@ -59,14 +55,15 @@ function Slider:detectEvent ( evt )
 	self.hitRegion.x, self.hitRegion.y, self.hitRegion.width, self.hitRegion.height =
 	self.x+self.xspace, self.y+self.yspace, self.width, self.height
 	
+	local platformConst = self.parent:getPlatformConst()
 	local triggerChange = false
 	if self.parent:isFocusOn( self ) then
-		if evt.keyEntered == self.parent.platformConst.KEYUP then
+		if self.parent:isKeyEntered( evt, platformConst.KEYUP ) then
 			if self.value > 0 then
 				self.value = self.value - 1
 				triggerChange = true
 			end
-		elseif evt.keyEntered == self.parent.platformConst.KEYDOWN then
+		elseif self.parent:isKeyEntered( evt, platformConst.KEYDOWN ) then
 			if self.value < self.maxValue then
 				self.value = self.value + 1
 				triggerChange = true

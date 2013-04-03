@@ -11,7 +11,8 @@ local Component = Object:extend{
 	ID = 0,
 	parent = nil,
 	canFocusOn = true,
-	canEventOn = true
+	canEventOn = true,
+	isHoverFocus = false
 }
 
 function Component:new ( obj )
@@ -24,12 +25,18 @@ end
 function Component:handleEvent ( evt )
 	local eventType = self:detectEvent( evt )
 	
-	if( eventType ~= "nothing") then
+	if( eventType == "mousedown" or eventType == "click" ) then
 		self.parent:focusOn( self )
 	end
 	
 	if( eventType == "mousedown") then
 		self:onMouseDown ( evt )
+		return
+	elseif( eventType == "mouseup") then
+		self:onMouseUp ( evt )
+		return
+	elseif( eventType == "mousemotion") then
+		self:onMouseMotion ( evt )
 		return
 	elseif( eventType == "click") then
 		self:onClick ( evt )
@@ -49,7 +56,7 @@ function Component:detectEvent ( evt )
 		and self.parent:isMousePress( self ) )
 	
 	if self.parent:isFocusOn( self ) then
-		if evt.keyEntered == self.parent.platformConst.KEYRETURN then
+		if self.parent:isKeyEntered( evt, self.parent:getPlatformConst().KEYRETURN ) then
 			triggerClick = true
 		end
 	end
@@ -63,6 +70,16 @@ function Component:detectEvent ( evt )
 		return "mousedown"
 	end
 	
+	local triggerMouseUp = self.parent:isMouseHover( self ) and not evt.mouseDown
+	if triggerMouseUp then
+		return "mouseup"
+	end
+	
+	local triggerMouseMotion = self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEMOTION )
+	if triggerMouseMotion then
+		return "mousemotion"
+	end
+	
 	return "nothing"
 end
 
@@ -70,6 +87,9 @@ function Component:paint ()
 	if self.parent:isFocusOn( self ) and self.canFocusOn then
 		self.parent:drawRectWire( self.outRegion.x, self.outRegion.y, self.outRegion.width, self.outRegion.height, 0xff0000 )
 	end
+end
+
+function Component:onMouseMotion ( evt )
 end
 
 function Component:onMouseUp ( evt )
