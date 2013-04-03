@@ -1,6 +1,8 @@
 local Object = require( "object" )
 
 local Event = Object:extend{
+	className = "Event",
+	
 	eventType = nil,
 	
 	mouseDown = false, 

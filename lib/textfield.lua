@@ -1,6 +1,8 @@
 local Component = require( "component" )
 local band = bit.band
 local Textfield = Component:extend{
+	className = "Textfield",
+	
 	width = 64, height = 48,
 	buffer = "Text"
 }

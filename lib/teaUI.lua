@@ -6,6 +6,8 @@ local Component = require( "component" )
 local shiftLeft, shiftRight, bor, band, min, max, fmod = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max, math.fmod
 
 local teaUI = Component:extend{
+	className = "teaUI",
+	
 	--Control
 	uiDriver = nil,
 	

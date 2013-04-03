@@ -1,6 +1,8 @@
 local Component = require( "component" )
 
 local Button = Component:extend{
+	className = "Button",
+	
 	width = 64, height = 48,
 	xfloat = 2, yfloat = 2
 }

@@ -1,6 +1,8 @@
 local Component = require( "component" )
 
 local Image = Component:extend{
+	className = "Image",
+	
 	width = 64, height = 48,
 	img = nil, canFocusOn = false
 }

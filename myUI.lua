@@ -23,20 +23,16 @@ function myComponent:onMouseDown ( evt )
 	printIDs( self )
 end
 
-myComponent = Image:create ( myUI:GenID(), 30, 30, myUI:loadBitmap( "res/test.bmp" ) )
-myComponent.canFocusOn = true
---myComponent.canEventOn = false
-function myComponent:onDrag ( evt ) printIDs( self )
-	if self.parent:isMousePress( self ) then print ( "123" )
-		self.x, self.y = evt.mouseX - self.width/2, evt.mouseY - self.height/2
-	end
-end
-myUI:addComponent( myComponent )
-
 myComponent = Button:create ( myUI:GenID(), 50, 50 )
 function myComponent:onClick ( evt )
 	self.parent:randomBgColor()
 	print( 1 )
+end
+function myComponent:onMouseDown ( evt )
+	for i = 1, #(self.mysuper) do
+		print(self.mysuper[i].className)
+	end
+	print(self.className)
 end
 function myComponent:onKeyUp ( evt )
 	print( 2 )
@@ -78,6 +74,16 @@ function myComponent:onDrag ( evt ) printIDs( self )
 end
 function myComponent:onMouseMotion ( evt )
 	print("Move")
+end
+myUI:addComponent( myComponent )
+
+myComponent = Image:create ( myUI:GenID(), 30, 30, myUI:loadBitmap( "res/test.bmp" ) )
+myComponent.canFocusOn = true
+--myComponent.canEventOn = false
+function myComponent:onDrag ( evt ) printIDs( self )
+	if self.parent:isMousePress( self ) then print ( "123" )
+		self.x, self.y = evt.mouseX - self.width/2, evt.mouseY - self.height/2
+	end
 end
 myUI:addComponent( myComponent )
 

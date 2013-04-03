@@ -5,6 +5,8 @@ local Event = require( "event" )
 local shiftLeft, shiftRight, bor, band, min, max, fmod = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max, math.fmod
 
 local uiDriver = Object:extend{
+	className = "uiDriver",
+	
 	--Control
 	event = nil,
 	rawEvent = nil,

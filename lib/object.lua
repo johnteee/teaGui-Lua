@@ -1,4 +1,4 @@
-local Object = {}
+local Object = { className = "Object" }
 
 function Object:new ( obj )
 	obj = obj or {}

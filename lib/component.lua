@@ -1,6 +1,8 @@
 local Object = require( "object" )
 
 local Component = Object:extend{
+	className = "Component",
+	
 	x = 0, y = 0,
 	width = 0, height = 0,
 	hitRegion = nil,

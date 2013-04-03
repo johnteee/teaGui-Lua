@@ -26,6 +26,8 @@ myUI:addComponent( myComponent )
 ]]--
 
 local Slider = Component:extend{
+	className = "Slider",
+	
 	maxValue = 100, value = 50,
 	width = 16, height = 255,
 	
