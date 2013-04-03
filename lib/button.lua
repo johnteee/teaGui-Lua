@@ -53,4 +53,10 @@ function Button:paint ()
 	end
 end
 
+function Button:onKeyDown( evt )
+	if self.parent:isKeyEntered( evt, self.parent:getPlatformConst().KEYRETURN ) then
+			self:onClick( evt )
+	end
+end
+
 return Button

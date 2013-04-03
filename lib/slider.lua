@@ -45,7 +45,7 @@ function Slider:create ( ID, x, y, width, height, maxValue, value )
 end
 
 function Slider:handleEvent ( evt )
-	local eventType, value = self:detectEvent( evt )
+	local eventType, value = self:super().handleEvent ( self, evt )
 	
 	if( eventType == "change") then
 		self.value = value

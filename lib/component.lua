@@ -24,7 +24,11 @@ function Component:new ( obj )
 end
 
 function Component:handleEvent ( evt )
-	local eventType = self:detectEvent( evt )
+	if self.canEventOn == false then
+		return
+	end
+	
+	local eventType, value = self:detectEvent( evt )
 	
 	if( eventType == "mousedown" or eventType == "click" ) then
 		self.parent:focusOn( self )
@@ -32,20 +36,21 @@ function Component:handleEvent ( evt )
 	
 	if( eventType == "mousedown") then
 		self:onMouseDown ( evt )
-		return
 	elseif( eventType == "mouseup") then
 		self:onMouseUp ( evt )
-		return
 	elseif( eventType == "mousemotion") then
 		self:onMouseMotion ( evt )
-		return
 	elseif( eventType == "click") then
 		self:onClick ( evt )
-		return
 	elseif( eventType == "drag") then
 		self:onDrag ( evt )
-		return
+	elseif( eventType == "keydown") then
+		self:onKeyDown ( evt )
+	elseif( eventType == "keyup") then
+		self:onKeyUp ( evt )
 	end
+	
+	return eventType, value
 end
 
 function Component:detectEvent ( evt )
@@ -58,12 +63,6 @@ function Component:detectEvent ( evt )
 	local triggerClick = ( not evt.mouseDown
 		and self.parent:isMouseHover( self )
 		and self.parent:isMousePress( self ) )
-	
-	if self.parent:isFocusOn( self ) then
-		if self.parent:isKeyEntered( evt, self.parent:getPlatformConst().KEYRETURN ) then
-			triggerClick = true
-		end
-	end
 	
 	if( triggerClick ) then
 		return "click"
@@ -89,6 +88,16 @@ function Component:detectEvent ( evt )
 		return "mousemotion"
 	end
 	
+	local triggerKeyDown = self.parent:isFocusOn( self ) and self.parent:isEventType ( evt, self.parent:getEventTypeConst().KEYDOWN )
+	if triggerKeyDown then
+		return "keydown"
+	end
+	
+	local triggerKeyUp = self.parent:isFocusOn( self ) and self.parent:isEventType ( evt, self.parent:getEventTypeConst().KEYUP )
+	if triggerKeyUp then
+		return "keyup"
+	end
+	
 	return "nothing"
 end
 
@@ -111,6 +120,12 @@ function Component:onClick ( evt )
 end
 
 function Component:onDrag ( evt )
+end
+
+function Component:onKeyDown ( evt )
+end
+
+function Component:onKeyUp ( evt )
 end
 
 function Component:setHitRegion( x, y, w, h )

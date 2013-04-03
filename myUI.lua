@@ -14,6 +14,12 @@ myUI = teaUI:create()
 
 local myComponent
 
+myComponent = myUI
+function myComponent:onMouseDown ( evt )
+	print ( self.parent.activeItem .. " " .. self.ID )
+end
+
+
 myComponent = Image:create ( myUI:GenID(), 30, 30, myUI:loadBitmap( "res/test.bmp" ) )
 myComponent.canFocusOn = true
 --myComponent.canEventOn = false
@@ -28,6 +34,9 @@ myComponent = Button:create ( myUI:GenID(), 50, 50 )
 function myComponent:onClick ( evt )
 	self.parent:randomBgColor()
 	print( 1 )
+end
+function myComponent:onKeyUp ( evt )
+	print( 2 )
 end
 myUI:addComponent( myComponent )
 
@@ -51,9 +60,14 @@ end
 myUI:addComponent( myComponent )
 
 myComponent = Textfield:create ( myUI:GenID(), 50, 300, 300, 25)
-function myComponent:onChange ( evt )
+function myComponent:onKeyUp ( evt )
 	print( self.buffer )
 	self.parent:setTitle("Text Changed!")
+end
+function myComponent:onDrag ( evt ) print ( self.parent.activeItem .. " " .. self.ID )
+	if self.parent:isMousePress( self ) then print ( "123" )
+		self.x, self.y = evt.mouseX - self.width/2, evt.mouseY - self.height/2
+	end
 end
 myUI:addComponent( myComponent )
 
@@ -75,6 +89,11 @@ myComponent = Slider:create ( myUI:GenID(), 600, 40, 90, 400,  15, band( shiftRi
 function myComponent:onChange ( evt )
 	print( self.value )
 	self.parent.backgroundColor = bor( band( self.parent.backgroundColor, 0x00ffff ), shiftLeft( self.value, 20 ) )
+end
+function myComponent:onDrag ( evt ) print ( self.parent.activeItem .. " " .. self.ID )
+	if self.parent:isMousePress( self ) then print ( "123" )
+		self.x, self.y = evt.mouseX - self.width/2, evt.mouseY - self.height/2
+	end
 end
 myUI:addComponent( myComponent )
 

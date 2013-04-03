@@ -5,7 +5,7 @@ local Event = require( "event" )
 local Component = require( "component" )
 local shiftLeft, shiftRight, bor, band, min, max, fmod = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max, math.fmod
 
-local teaUI = Object:extend{
+local teaUI = Component:extend{
 	--Control
 	uiDriver = nil,
 	
@@ -17,6 +17,8 @@ local teaUI = Object:extend{
 	element = nil,
 	
 	loopDelay = 10,
+	canFocusOn = false,
+	canEventOn = true,
 	
 	--Layout
 	width = 800, height = 600,
@@ -56,6 +58,9 @@ function teaUI:init()
 	--Env
 	self.uiDriver = uiDriver:new()
 	self.uiDriver:init()
+	
+	self.parent = self
+	self.ID = self:GenID()
 	
 	--Element
 	self:initElement()
@@ -115,7 +120,7 @@ function teaUI:regionHit( x, y, w, h )
 		evt.mouseY <= y + h )
 end
 
-function teaUI:render()
+function teaUI:paint()
 	self:drawRect( 0, 0, self.width, self.height, self.backgroundColor )
 	self:drawString( self.title, 10, 10 )
 	
@@ -153,32 +158,46 @@ function teaUI:quit()
 	self.isShoudExit = true
 end
 
-function teaUI:detectEvent( rawEvent )
+function teaUI:handleEvent( rawEvent )
 	local driver = self:getUIDriver()
 	local evt = driver:handleRawEvent( rawEvent )
+	local platformConst = self:getPlatformConst()
+	local eventTypeConst = self:getEventTypeConst()
+	
+	local eventType = self:super().handleEvent ( self, evt )
+	
+	if driver:isKeyEntered( evt, platformConst.ESCAPE ) then
+		self.isShoudExit = true
+	end
+	
+	if self:isEventType( evt, eventTypeConst.QUIT ) then
+		self:onQuit( evt )
+	end
+	
+	self:handleComponent()
+end
+
+function teaUI:detectEvent( evt )
+	local driver = self:getUIDriver()
 	local eventtype = self:getEventTypeConst()
 	local platformConst = self:getPlatformConst()
 	
 	--System
 	if driver:isEventType( evt, eventtype.QUIT ) then
-		self.isShoudExit = true
+		return "quit"
 	--Mouse
 	elseif driver:isEventType( evt, eventtype.MOUSEMOTION ) then
-		
+		return "mousemotion"
 	elseif driver:isEventType( evt, eventtype.MOUSEBUTTONDOWN ) then
-		
+		return "mousedown"
 	elseif driver:isEventType( evt, eventtype.MOUSEBUTTONUP ) then
-		
+		return "mouseup"
 	--KeyBoard
 	elseif driver:isEventType( evt, eventtype.KEYDOWN ) then
-		if driver:isKeyEntered( evt, platformConst.ESCAPE ) then
-			self.isShoudExit = true
-		end
 	elseif driver:isEventType( evt, eventtype.KEYUP ) then
-		
 	end
 	
-	self:handleComponent()
+	return "nothing"
 end
 
 function teaUI:isMouseHover( comp )
@@ -332,13 +351,17 @@ function teaUI:handleComponent()
 	self:guiFinish()
 end
 
+function teaUI:onQuit( evt )
+	self.isShoudExit = true
+end
+
 function teaUI:mainLoop()
 	local driver = self:getUIDriver()
 	while not self.isShoudExit do
 		while driver:isAnyEvent() do -- If non-Event, then repaint only
-			self:detectEvent( driver.rawEvent ) -- Detect rawEvent
+			self:handleEvent( driver.rawEvent ) -- Detect rawEvent
 		end
-		self:render() -- Render
+		self:paint() -- Render
 		
 		self:refresh()
 		

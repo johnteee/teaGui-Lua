@@ -17,9 +17,10 @@ function Textfield:create ( ID, x, y, width, height, buffer )
 end
 
 function Textfield:handleEvent ( evt )
-	local eventType = self:detectEvent( evt )
+	local eventType = self:super().handleEvent ( self, evt )
 	
 	if( eventType == "change") then
+		self:onKeyDown( evt )
 		self:onChange ( evt )
 	end
 end
@@ -34,11 +35,9 @@ function Textfield:detectEvent ( evt )
 	if self.parent:isFocusOn( self ) then
 		if self.parent:isKeyEntered( evt, self.parent:getPlatformConst().BACKSPACE ) then
 			if #str > 0 then
-				self:changeBuffer( string.sub(str, 1, -1 - 1) )
 				triggerChange = true
 			end
 		elseif evt.keyChar >= 32 and evt.keyChar < 127 and (#str + 1 + 1)*self.parent.fontWidth < self.width then
-			self:changeBuffer( str .. string.char(evt.keyChar) )
 			triggerChange = true
 		end
 	end
@@ -77,6 +76,17 @@ function Textfield:paint ()
 end
 
 function Textfield:onChange ( evt )
+end
+
+function Textfield:onKeyDown ( evt )
+	local str = self.buffer
+	if self.parent:isKeyEntered( evt, self.parent:getPlatformConst().BACKSPACE ) then
+			if #str > 0 then
+				self:changeBuffer( string.sub(str, 1, -1 - 1) )
+			end
+		elseif evt.keyChar >= 32 and evt.keyChar < 127 and (#str + 1 + 1)*self.parent.fontWidth < self.width then
+			self:changeBuffer( str .. string.char(evt.keyChar) )
+	end
 end
 
 return Textfield
