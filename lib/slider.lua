@@ -27,7 +27,9 @@ myUI:addComponent( myComponent )
 
 local Slider = Component:extend{
 	maxValue = 100, value = 50,
-	width = 16, height = 255
+	width = 16, height = 255,
+	
+	canDrag = false
 }
 
 function Slider:create ( ID, x, y, width, height, maxValue, value )

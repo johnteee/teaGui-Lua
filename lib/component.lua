@@ -12,7 +12,8 @@ local Component = Object:extend{
 	parent = nil,
 	canFocusOn = true,
 	canEventOn = true,
-	isHoverFocus = false
+	canHoverFocus = false,
+	canDrag = true
 }
 
 function Component:new ( obj )
@@ -41,6 +42,9 @@ function Component:handleEvent ( evt )
 	elseif( eventType == "click") then
 		self:onClick ( evt )
 		return
+	elseif( eventType == "drag") then
+		self:onDrag ( evt )
+		return
 	end
 end
 
@@ -65,17 +69,22 @@ function Component:detectEvent ( evt )
 		return "click"
 	end
 	
-	local triggerMouseDown = self.parent:isMousePress( self ) and evt.mouseDown
+	local triggerMouseDown = self.parent:isMouseHover( self ) and evt.mouseDown and self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEBUTTONDOWN )
 	if triggerMouseDown then
 		return "mousedown"
 	end
 	
-	local triggerMouseUp = self.parent:isMouseHover( self ) and not evt.mouseDown
+	local triggerMouseUp = self.parent:isMouseHover( self ) and not evt.mouseDown and self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEBUTTONUP )
 	if triggerMouseUp then
 		return "mouseup"
 	end
 	
-	local triggerMouseMotion = self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEMOTION )
+	local triggerMouseMotion = self.parent:isMousePress( self ) and self.canDrag and evt.mouseDown and self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEMOTION )
+	if triggerMouseMotion then
+		return "drag"
+	end
+	
+	local triggerMouseMotion = self.parent:isMouseHover( self ) and self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEMOTION )
 	if triggerMouseMotion then
 		return "mousemotion"
 	end
@@ -99,6 +108,9 @@ function Component:onMouseDown ( evt )
 end
 
 function Component:onClick ( evt )
+end
+
+function Component:onDrag ( evt )
 end
 
 function Component:setHitRegion( x, y, w, h )

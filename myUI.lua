@@ -17,7 +17,7 @@ local myComponent
 myComponent = Image:create ( myUI:GenID(), 30, 30, myUI:loadBitmap( "res/test.bmp" ) )
 myComponent.canFocusOn = true
 --myComponent.canEventOn = false
-function myComponent:onMouseMotion ( evt ) print ( self.parent.activeItem .. " " .. self.ID )
+function myComponent:onDrag ( evt ) print ( self.parent.activeItem .. " " .. self.ID )
 	if self.parent:isMousePress( self ) then print ( "123" )
 		self.x, self.y = evt.mouseX - self.width/2, evt.mouseY - self.height/2
 	end
