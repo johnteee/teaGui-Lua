@@ -182,22 +182,43 @@ function teaUI:detectEvent( evt )
 	local eventtype = self:getEventTypeConst()
 	local platformConst = self:getPlatformConst()
 	
+	local eventArray, valueArray = {}, {}
+	eventArray.empty = true
+	
 	--System
 	if driver:isEventType( evt, eventtype.QUIT ) then
-		return "quit"
+		eventArray["quit"] = "quit"
+		valueArray["quit"] = "quit"
+		eventArray.empty = false
 	--Mouse
 	elseif driver:isEventType( evt, eventtype.MOUSEMOTION ) then
-		return "mousemotion"
+		eventArray["mousemotion"] = "mousemotion"
+		valueArray["mousemotion"] = "mousemotion"
+		eventArray.empty = false
 	elseif driver:isEventType( evt, eventtype.MOUSEBUTTONDOWN ) then
-		return "mousedown"
+		eventArray["mousedown"] = "mousedown"
+		valueArray["mousedown"] = "mousedown"
+		eventArray.empty = false
 	elseif driver:isEventType( evt, eventtype.MOUSEBUTTONUP ) then
-		return "mouseup"
+		eventArray["mouseup"] = "mouseup"
+		valueArray["mouseup"] = "mouseup"
+		eventArray.empty = false
 	--KeyBoard
 	elseif driver:isEventType( evt, eventtype.KEYDOWN ) then
+		eventArray["keydown"] = "keydown"
+		valueArray["keydown"] = "keydown"
+		eventArray.empty = false
 	elseif driver:isEventType( evt, eventtype.KEYUP ) then
+		eventArray["keyup"] = "keyup"
+		valueArray["keyup"] = "keyup"
+		eventArray.empty = false
 	end
 	
-	return "nothing"
+	if( eventArray.empty == false ) then
+		return eventArray, valueArray
+	end
+	
+	return { ["nothing"] = "nothing" }, { ["nothing"] = "nothing" }
 end
 
 function teaUI:isMouseHover( comp )

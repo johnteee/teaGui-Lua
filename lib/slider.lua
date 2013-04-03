@@ -45,10 +45,10 @@ function Slider:create ( ID, x, y, width, height, maxValue, value )
 end
 
 function Slider:handleEvent ( evt )
-	local eventType, value = self:super().handleEvent ( self, evt )
+	local eventArray, valueArray = self:super().handleEvent ( self, evt )
 	
-	if( eventType == "change") then
-		self.value = value
+	if( eventArray["change"] ) then
+		self.value = valueArray["change"]
 		self:onChange ( evt )
 	end
 end
@@ -84,11 +84,14 @@ function Slider:detectEvent ( evt )
 		end
 	end
 	
+	local eventArray, valueArray = self:super().detectEvent( self, evt )
+	
 	if triggerChange == true then
-		return "change", self.value
+		eventArray["change"] = "change"
+		valueArray["change"] = self.value
 	end
 	
-	return self:super().detectEvent( self, evt ), self.value
+	return eventArray, valueArray
 end
 
 function Slider:paint ()

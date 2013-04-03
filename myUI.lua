@@ -12,18 +12,21 @@ local shiftLeft, shiftRight, bor, band, min, max = bit.lshift, bit.rshift, bit.b
 
 myUI = teaUI:create()
 
+local function printIDs( self )
+	print ( "active: " .. self.parent.activeItem .. " self: " .. self.ID )
+end
+
 local myComponent
 
 myComponent = myUI
 function myComponent:onMouseDown ( evt )
-	print ( self.parent.activeItem .. " " .. self.ID )
+	printIDs( self )
 end
-
 
 myComponent = Image:create ( myUI:GenID(), 30, 30, myUI:loadBitmap( "res/test.bmp" ) )
 myComponent.canFocusOn = true
 --myComponent.canEventOn = false
-function myComponent:onDrag ( evt ) print ( self.parent.activeItem .. " " .. self.ID )
+function myComponent:onDrag ( evt ) printIDs( self )
 	if self.parent:isMousePress( self ) then print ( "123" )
 		self.x, self.y = evt.mouseX - self.width/2, evt.mouseY - self.height/2
 	end
@@ -60,14 +63,21 @@ end
 myUI:addComponent( myComponent )
 
 myComponent = Textfield:create ( myUI:GenID(), 50, 300, 300, 25)
+function myComponent:onKeyDown ( evt )
+	print( self.buffer )
+	self.parent:setTitle("KeyDown!")
+end
 function myComponent:onKeyUp ( evt )
 	print( self.buffer )
 	self.parent:setTitle("Text Changed!")
 end
-function myComponent:onDrag ( evt ) print ( self.parent.activeItem .. " " .. self.ID )
+function myComponent:onDrag ( evt ) printIDs( self )
 	if self.parent:isMousePress( self ) then print ( "123" )
 		self.x, self.y = evt.mouseX - self.width/2, evt.mouseY - self.height/2
 	end
+end
+function myComponent:onMouseMotion ( evt )
+	print("Move")
 end
 myUI:addComponent( myComponent )
 

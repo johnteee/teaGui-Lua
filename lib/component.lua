@@ -28,32 +28,38 @@ function Component:handleEvent ( evt )
 		return
 	end
 	
-	local eventType, value = self:detectEvent( evt )
+	local eventArray, valueArray = self:detectEvent( evt )
 	
-	if( eventType == "mousedown" or eventType == "click" ) then
-		self.parent:focusOn( self )
+	for key in pairs(eventArray) do
+		if( key == "mousedown" or key == "click" ) then
+			self.parent:focusOn( self )
+		end
+		
+		if( key == "mousedown") then
+			self:onMouseDown ( evt )
+		elseif( key == "mouseup") then
+			self:onMouseUp ( evt )
+		elseif( key == "mousemotion") then
+			self:onMouseMotion ( evt )
+		elseif( key == "click") then
+			self:onClick ( evt )
+		elseif( key == "drag") then
+			self:onDrag ( evt )
+		elseif( key == "keydown") then
+			self:onKeyDown ( evt )
+		elseif( key == "keyup") then
+			self:onKeyUp ( evt )
+		end
+		
 	end
 	
-	if( eventType == "mousedown") then
-		self:onMouseDown ( evt )
-	elseif( eventType == "mouseup") then
-		self:onMouseUp ( evt )
-	elseif( eventType == "mousemotion") then
-		self:onMouseMotion ( evt )
-	elseif( eventType == "click") then
-		self:onClick ( evt )
-	elseif( eventType == "drag") then
-		self:onDrag ( evt )
-	elseif( eventType == "keydown") then
-		self:onKeyDown ( evt )
-	elseif( eventType == "keyup") then
-		self:onKeyUp ( evt )
-	end
-	
-	return eventType, value
+	return eventArray, valueArray
 end
 
 function Component:detectEvent ( evt )
+	local eventArray, valueArray = {}, {}
+	eventArray.empty = true
+	
 	self:setOutRegion( self.hitRegion.x, self.hitRegion.y, self.hitRegion.width, self.hitRegion.height )
 	
 	self.parent:checkHitOn( self, self.hitRegion.x, self.hitRegion.y, self.hitRegion.width, self.hitRegion.height )
@@ -65,40 +71,58 @@ function Component:detectEvent ( evt )
 		and self.parent:isMousePress( self ) )
 	
 	if( triggerClick ) then
-		return "click"
+		eventArray["click"] = "click"
+		valueArray["click"] = "click"
+		eventArray.empty = false
 	end
 	
 	local triggerMouseDown = self.parent:isMouseHover( self ) and evt.mouseDown and self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEBUTTONDOWN )
 	if triggerMouseDown then
-		return "mousedown"
+		eventArray["mousedown"] = "mousedown"
+		valueArray["mousedown"] = "mousedown"
+		eventArray.empty = false
 	end
 	
 	local triggerMouseUp = self.parent:isMouseHover( self ) and not evt.mouseDown and self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEBUTTONUP )
 	if triggerMouseUp then
-		return "mouseup"
+		eventArray["mouseup"] = "mouseup"
+		valueArray["mouseup"] = "mouseup"
+		eventArray.empty = false
 	end
 	
-	local triggerMouseMotion = self.parent:isMousePress( self ) and self.canDrag and evt.mouseDown and self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEMOTION )
-	if triggerMouseMotion then
-		return "drag"
+	local triggerDrag = self.parent:isMousePress( self ) and self.canDrag and evt.mouseDown and self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEMOTION )
+	if triggerDrag then
+		eventArray["drag"] = "drag"
+		valueArray["drag"] = "drag"
+		eventArray.empty = false
 	end
 	
-	local triggerMouseMotion = self.parent:isMouseHover( self ) and self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEMOTION )
+	local triggerMouseMotion = (self.parent:isMouseHover( self ) or self.parent:isMousePress( self )) and self.parent:isEventType ( evt, self.parent:getEventTypeConst().MOUSEMOTION )
 	if triggerMouseMotion then
-		return "mousemotion"
+		eventArray["mousemotion"] =  "mousemotion"
+		valueArray["mousemotion"] =  "mousemotion"
+		eventArray.empty = false
 	end
 	
 	local triggerKeyDown = self.parent:isFocusOn( self ) and self.parent:isEventType ( evt, self.parent:getEventTypeConst().KEYDOWN )
 	if triggerKeyDown then
-		return "keydown"
+		eventArray["keydown"] =  "keydown"
+		valueArray["keydown"] =  "keydown"
+		eventArray.empty = false
 	end
 	
 	local triggerKeyUp = self.parent:isFocusOn( self ) and self.parent:isEventType ( evt, self.parent:getEventTypeConst().KEYUP )
 	if triggerKeyUp then
-		return "keyup"
+		eventArray["keyup"] =  "keyup"
+		valueArray["keyup"] =  "keyup"
+		eventArray.empty = false
 	end
 	
-	return "nothing"
+	if( eventArray.empty == false ) then
+		return eventArray, valueArray
+	end
+	
+	return { ["nothing"] = "nothing" }, { ["nothing"] = "nothing" }
 end
 
 function Component:paint ()
