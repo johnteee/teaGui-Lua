@@ -10,12 +10,21 @@ end
 function Object:extend ( obj )
 	obj = self:new ( obj )
 	
-	obj.mysuper = self
+	obj.mysuper = {}
+	local oldmysuper = self.mysuper or {}
+	
+	if #oldmysuper > 0 then
+		for i = 1, #oldmysuper do
+			obj.mysuper[i] = oldmysuper[i]
+		end
+	end
+	
+	obj.mysuper[#oldmysuper + 1] = self
 	return obj
 end
 
 function Object:super ()
-	return self.mysuper
+	return self.mysuper[#(self.mysuper)]
 end
 
 return Object
