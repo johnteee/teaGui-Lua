@@ -10,9 +10,9 @@ Enjoy it!:)
 
 # How to Use It?
 
-Just GIT it
+Just GIT it,their all lua scripts.
 
-Using [UFO,Portable distribution of LuaJIT][Ufo] and execute myUI.lua (example file)
+Use [UFO,Portable distribution of LuaJIT][Ufo] and execute myUI.lua (example file)
 
 Just read the code in myUI.lua and lib/component.lua ... etc,and you'll know how to use it
 

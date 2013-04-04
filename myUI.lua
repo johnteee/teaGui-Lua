@@ -11,7 +11,7 @@ local Image = require( "image" )
 local shiftLeft, shiftRight, bor, band, min, max = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max
 
 local function printIDs( self )
-	print ( "active: " .. self.parent.activeItem .. " self: " .. self.ID )
+	print ( "Pressed: " .. self.parent.pressedItem .. " Self: " .. self.ID )
 end
 
 --Create new teaUI (myUI is Global Variable)

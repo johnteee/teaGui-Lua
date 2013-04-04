@@ -11,8 +11,8 @@ local teaUI = Component:extend{
 	--Control
 	uiDriver = nil,
 	
-	hotItem = 0, activeItem = 0,
-	kbdItem = 0, lastWidget = 0,
+	hoverItem = 0, pressedItem = 0,
+	focusOnItem = 0, lastWidget = 0,
 	tabSwitch = true, --Can us TAB key switch focus
 	
 	isShoudExit = false, --Main Loop Exit control
@@ -21,6 +21,7 @@ local teaUI = Component:extend{
 	loopDelay = 10, --sleep time in each loop
 	canFocusOn = false, --Can focus on?
 	canEventOn = true, --Can Event handling?
+	canHoverOn = false, --Can Hover On -->but teaUI have no need and must be disabled
 	
 	--Layout
 	width = 800, height = 600, --That's screen width and height
@@ -41,9 +42,9 @@ end
 
 function teaUI:init()
 	--Control
-	self.hotItem = 0
-	self.activeItem = 0
-	self.kbdItem = 0
+	self.hoverItem = 0
+	self.pressedItem = 0
+	self.focusOnItem = 0
 	self.lastWidget = 0
 	self.tabSwitch = true
 	
@@ -163,6 +164,13 @@ end
 function teaUI:handleEvent( rawEvent )
 	local driver = self:getUIDriver()
 	local evt = driver:handleRawEvent( rawEvent )
+	
+	self:guiPrepare() --Clean some status
+	
+	--Handle components first
+	self:handleComponent()
+	
+	--Handle teaUI itself events
 	local platformConst = self:getPlatformConst()
 	local eventTypeConst = self:getEventTypeConst()
 	
@@ -176,10 +184,19 @@ function teaUI:handleEvent( rawEvent )
 		self:onQuit( evt )
 	end
 	
-	self:handleComponent()
+	self:guiFinish() --Clean some status
 end
 
 function teaUI:detectEvent( evt )
+	-- if self:isNoOnePressed() and evt.mouseDown then
+			-- self:pressOn( self )
+			-- self:focusOn( self )
+	-- end
+	self:setHitRegion( self.x, self.y, self.width, self.height )
+	
+	self:checkHitOn( self, self.hitRegion.x, self.hitRegion.y, self.hitRegion.width, self.hitRegion.height )
+	self:checkSwitchFocus( self )
+	
 	local driver = self:getUIDriver()
 	local eventtype = self:getEventTypeConst()
 	local platformConst = self:getPlatformConst()
@@ -224,15 +241,15 @@ function teaUI:detectEvent( evt )
 end
 
 function teaUI:isMouseHover( comp )
-	return self.hotItem == comp.ID
+	return self.hoverItem == comp.ID
 end
 
 function teaUI:isMousePress( comp )
-	return self.activeItem == comp.ID
+	return self.pressedItem == comp.ID
 end
 
 function teaUI:isFocusOn( comp )
-	return self.kbdItem == comp.ID
+	return self.focusOnItem == comp.ID
 end
 
 function teaUI:isNoOneFocusOn()
@@ -248,17 +265,17 @@ function teaUI:getLastWidget()
 end
 
 function teaUI:hoverOn( comp )
-	self.hotItem = comp.ID
+	self.hoverItem = comp.ID
 end
 
 function teaUI:focusOn( comp )
 	if comp.canFocusOn == true then
-		self.kbdItem = comp.ID
+		self.focusOnItem = comp.ID
 	end
 end
 
 function teaUI:pressOn( comp )
-	self.activeItem = comp.ID
+	self.pressedItem = comp.ID
 end
 
 function teaUI:releaseFocus()
@@ -276,7 +293,10 @@ function teaUI:checkHitOn( comp, x, y, width, height )
 	
 	local evt = self:getEvent()
 	if self:regionHit( x, y, width, height ) then
-		self:hoverOn( comp )
+		if comp.canHoverOn then
+			self:hoverOn( comp )
+		end
+		
 		if self:isNoOnePressed() and evt.mouseDown then
 			self:pressOn( comp )
 			self:focusOn( comp )
@@ -340,7 +360,7 @@ function teaUI:isEventType( evt, eventType )
 end
 
 function teaUI:guiPrepare()
-	self.hotItem = 0
+	self.hoverItem = 0
 end
 
 function teaUI:guiFinish()
@@ -350,12 +370,12 @@ function teaUI:guiFinish()
 	
 	if not evt.mouseDown then
 		self:releasePress()
-	elseif self.activeItem == 0 then
-		self.activeItem = -1
+	elseif self.pressedItem == 0 then
+		self.pressedItem = -1
 	end
 	
 	if driver:isKeyEntered( evt, platformConst.TAB ) then
-		self.kbditem = 0
+		self.focusOnItem = 0
 	end
 	evt.keyEntered = 0
 	evt.keyChar = 0
@@ -364,14 +384,12 @@ end
 function teaUI:handleComponent()
 	local el, evt = self.element, self:getEvent()
 	
-	self:guiPrepare() --Clean some status
 	do
 		for i=1, #el do
 			local comp = el[ i ]
 			comp:handleEvent( evt ) --Handle component events
 		end
 	end
-	self:guiFinish() --Clean some status
 end
 
 function teaUI:onQuit( evt )

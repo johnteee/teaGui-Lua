@@ -14,6 +14,7 @@ local Component = Object:extend{
 	parent = nil,
 	canFocusOn = true,
 	canEventOn = true,
+	canHoverOn = true,
 	canHoverFocus = false,
 	canDrag = true
 }
