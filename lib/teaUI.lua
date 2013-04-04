@@ -6,29 +6,29 @@ local Component = require( "component" )
 local shiftLeft, shiftRight, bor, band, min, max, fmod = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max, math.fmod
 
 local teaUI = Component:extend{
-	className = "teaUI",
+	className = "teaUI", --Class Name
 	
 	--Control
 	uiDriver = nil,
 	
 	hotItem = 0, activeItem = 0,
 	kbdItem = 0, lastWidget = 0,
-	tabSwitch = true,
+	tabSwitch = true, --Can us TAB key switch focus
 	
-	isShoudExit = false,
-	element = nil,
+	isShoudExit = false, --Main Loop Exit control
+	element = nil, --Components container
 	
-	loopDelay = 10,
-	canFocusOn = false,
-	canEventOn = true,
+	loopDelay = 10, --sleep time in each loop
+	canFocusOn = false, --Can focus on?
+	canEventOn = true, --Can Event handling?
 	
 	--Layout
-	width = 800, height = 600,
-	backgroundColor = 0x77,
-	fontWidth = 14, fontHeight = 24,
+	width = 800, height = 600, --That's screen width and height
+	backgroundColor = 0x77, -- BgColor
+	fontWidth = 14, fontHeight = 24, --font
 	fontRequire = "font14x24",
 	
-	title = "This is a test"
+	title = "This is a test" --Caption for test
 }
 
 function teaUI:create()
@@ -364,14 +364,14 @@ end
 function teaUI:handleComponent()
 	local el, evt = self.element, self:getEvent()
 	
-	self:guiPrepare()
+	self:guiPrepare() --Clean some status
 	do
 		for i=1, #el do
 			local comp = el[ i ]
-			comp:handleEvent( evt )
+			comp:handleEvent( evt ) --Handle component events
 		end
 	end
-	self:guiFinish()
+	self:guiFinish() --Clean some status
 end
 
 function teaUI:onQuit( evt )

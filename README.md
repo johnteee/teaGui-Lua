@@ -3,9 +3,18 @@ teaGUI-Lua
 # What is teaGUI?
 
 It's inspired by [Imgui in C by Jari Kompp][Sol], and implemented with simple OO in Lua,
+
 and has been add more useful ideas,and more flexible than original Imgui.
 
 Enjoy it!:)
+
+# How to Use It?
+
+Just GIT it
+
+Using [UFO,Portable distribution of LuaJIT][Ufo] and execute myUI.lua (example file)
+
+Just read the code in myUI.lua and lib/component.lua ... etc,and you'll know how to use it
 
 # License
 
@@ -35,6 +44,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # Reference
 
 * original Imgui ( in C language )
+
 [Sol on Immediate Mode GUIs (IMGUI)][Sol]
 
 [Sol]: http://sol.gfxile.net/imgui/
+[Ufo]: https://github.com/malkia/ufo
