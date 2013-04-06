@@ -15,7 +15,7 @@ local function printIDs( self )
 end
 
 --Create new teaUI (myUI is Global Variable)
-myUI = teaUI:create()
+myUI = teaUI:create( 800, 600 )
 function myUI:onMouseDown ( evt )
 	print( "I'm myUI" ) --teaUI can get all event except drag,and it's useful for game input(global input event)
 	printIDs( self )
@@ -43,9 +43,11 @@ myUI:addComponent( myButton1 )
 --Define new Button
 --Define event handling and add it into myUI
 local myButton2 = Button:create ( myUI:GenID(), 150, 50 ) --at x = 150, y = 50
+myButton2.canHoverFocus = false --Disable focusOn when Hover only
 function myButton2:onClick ( evt )
 	print( "Button2 Click" )
 	self.parent:randomBgColor()
+	self.parent:toggleFullScreen()
 end
 myUI:addComponent( myButton2 )
 

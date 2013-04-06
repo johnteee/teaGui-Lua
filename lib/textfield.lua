@@ -20,9 +20,11 @@ end
 
 function Textfield:handleEvent ( evt )
 	local eventType, value = self:super().handleEvent ( self, evt )
+	local theFunc = nil
 	
 	if( eventType["change"] ) then
-		self:onChange ( evt )
+		theFunc = self.onChange
+		self.parent:createEventThreadAndStart( theFunc, self, evt )
 	end
 end
 

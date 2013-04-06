@@ -2,7 +2,7 @@ local Object = require ( "object" )
 local ffi = require( "ffi" )
 local sdl = require( "ffi/sdl" )
 local Event = require( "event" )
-local shiftLeft, shiftRight, bor, band, min, max, fmod = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max, math.fmod
+local shiftLeft, shiftRight, bor, band, bxor, min, max, fmod = bit.lshift, bit.rshift, bit.bor, bit.band, bit.bxor, math.min, math.max, math.fmod
 
 local uiDriver = Object:extend{
 	className = "uiDriver",
@@ -13,6 +13,10 @@ local uiDriver = Object:extend{
 	
 	--Layout
 	width = 800, height = 600,
+	nativeWidth = 0, nativeHeight = 0,
+	fullScreen = false, nativeResolutionFullScreen = false,
+	videoFlags = 0,
+	
 	fontWidth = 14, fontHeight = 24,
 	fontRequire = "font14x24",
 	
@@ -23,10 +27,37 @@ local uiDriver = Object:extend{
 
 function uiDriver:init()
 	--Env
+	SDL_INIT_AUDIO = 0x00000010
+	SDL_INIT_VIDEO = 0x00000020
+	SDL_INIT_CDROM = 0x00000100
+	SDL_INIT_JOYSTICK = 0x00000200
+	SDL_INIT_NOPARACHUTE = 0x00100000
+	SDL_INIT_EVENTTHREAD = 0x01000000
+	SDL_INIT_EVERYTHING  = 0x0000FFFF
+	
+	sdl.SDL_Init( SDL_INIT_EVERYTHING )
+	
+	local displayMode = ffi.new( "SDL_DisplayMode" )
+	sdl.SDL_GetDesktopDisplayMode( 0, displayMode )
+	self.nativeWidth = displayMode.w
+	self.nativeHeight = displayMode.h
+	
+	if self.fullScreen then
+		if self.nativeResolutionFullScreen then
+			self.width = self.nativeWidth
+			self.height = self.nativeHeight
+		end
+		self.videoFlags = bor( self.videoFlags, sdl.SDL_FULLSCREEN )
+	end
+	
+	self.videoFlags = bor( self.videoFlags, sdl.SDL_DOUBLEBUF )
+	
+	self.screen = sdl.SDL_SetVideoMode( self.width, self.height, 32, self.videoFlags )
+	self.renderer = sdl.SDL_CreateSoftwareRenderer( self.screen )
+	
 	sdl.SDL_EnableKeyRepeat( sdl.SDL_DEFAULT_REPEAT_DELAY, sdl.SDL_DEFAULT_REPEAT_INTERVAL )
 	sdl.SDL_EnableUNICODE(1)
-	self.screen = sdl.SDL_SetVideoMode( self.width, self.height, 32, 0 )
-	self.renderer = sdl.SDL_CreateSoftwareRenderer( self.screen )
+	
 	self.font = self:requireFont( self.fontRequire )
 	self.rawEvent = ffi.new( "SDL_Event" )
 	self.rectFg, self.rectBg = ffi.new( "SDL_Rect" ), ffi.new( "SDL_Rect" )
@@ -130,8 +161,25 @@ function uiDriver:refresh()
 	sdl.SDL_UpdateRect( self.screen, 0, 0, self.width, self.width )
 end
 
+function uiDriver:setWindowTitle( title )
+	sdl.SDL_WM_SetCaption( title, nil );
+end
+
 function uiDriver:randomColor()
 	return bor( sdl.SDL_GetTicks() * 0xc0cac01a, 0x77 )
+end
+
+function uiDriver:toggleFullScreen()
+	-- if self.nativeResolutionFullScreen then
+		-- self.videoFlags = bxor( self.videoFlags, sdl.SDL_FULLSCREEN )
+		-- local oldscreen, oldrenderer = self.screen, self.renderer
+		-- self.screen = sdl.SDL_SetVideoMode( self.width, self.height, 32, self.videoFlags )
+		-- self.renderer = sdl.SDL_CreateSoftwareRenderer( self.screen )
+		-- -- sdl.SDL_FreeSurface( oldscreen )
+		-- -- sdl.SDL_Free( oldrenderer )
+	-- else
+		sdl.SDL_WM_ToggleFullScreen( self.screen )
+	-- end
 end
 
 function uiDriver:isShowCursorNow()

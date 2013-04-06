@@ -48,10 +48,12 @@ end
 
 function Slider:handleEvent ( evt )
 	local eventArray, valueArray = self:super().handleEvent ( self, evt )
+	local theFunc = nil
 	
 	if( eventArray["change"] ) then
 		self.value = valueArray["change"]
-		self:onChange ( evt )
+		theFunc = self.onChange
+		self.parent:createEventThreadAndStart( theFunc, self, evt )
 	end
 end
 

@@ -15,7 +15,8 @@ local Component = Object:extend{
 	canFocusOn = true,
 	canEventOn = true,
 	canHoverOn = true,
-	canHoverFocus = false,
+	canPressFocus = true,
+	canHoverFocus = true,
 	canDrag = true
 }
 
@@ -34,26 +35,31 @@ function Component:handleEvent ( evt )
 	local eventArray, valueArray = self:detectEvent( evt )
 	
 	for key in pairs(eventArray) do
-		if( key == "mousedown" or key == "click" ) then
+		if ( key == "mousedown" or key == "click" ) and self.canPressFocus then
 			self.parent:focusOn( self )
 		end
 		
+		local theFunc = nil
+		
 		if( key == "mousedown") then
-			self:onMouseDown ( evt )
+			theFunc = self.onMouseDown
 		elseif( key == "mouseup") then
-			self:onMouseUp ( evt )
+			theFunc = self.onMouseUp
 		elseif( key == "mousemotion") then
-			self:onMouseMotion ( evt )
+			theFunc = self.onMouseMotion
 		elseif( key == "click") then
-			self:onClick ( evt )
+			theFunc = self.onClick
 		elseif( key == "drag") then
-			self:onDrag ( evt )
+			theFunc = self.onDrag
 		elseif( key == "keydown") then
-			self:onKeyDown ( evt )
+			theFunc = self.onKeyDown
 		elseif( key == "keyup") then
-			self:onKeyUp ( evt )
+			theFunc = self.onKeyUp
 		end
 		
+		if theFunc ~= nil then
+			self.parent:createEventThreadAndStart( theFunc, self, evt )
+		end
 	end
 	
 	return eventArray, valueArray

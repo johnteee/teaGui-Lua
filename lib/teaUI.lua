@@ -26,41 +26,47 @@ local teaUI = Component:extend{
 	--Layout
 	width = 800, height = 600, --That's screen width and height
 	backgroundColor = 0x77, -- BgColor
+	fullScreen = false, --Full Screen Mode
+	nativeResolutionFullScreen = true,
+	
 	fontWidth = 14, fontHeight = 24, --font
 	fontRequire = "font14x24",
 	
 	title = "This is a test" --Caption for test
 }
 
-function teaUI:create()
-	local newone = self:new()
+function teaUI:create( width, height, fullScreen, nativeResolutionFullScreen )
+	local newOne = self:new()
 	
-	newone:init() -- Initialize
+	newOne.width = width or newOne.width
+	newOne.height = height or newOne.height
+	newOne.fullScreen = fullScreen or newOne.fullScreen
+	newOne.nativeResolutionFullScreen = nativeResolutionFullScreen or newOne.nativeResolutionFullScreen
 	
-	return newone
+	newOne:init() -- Initialize
+	
+	return newOne
 end
 
 function teaUI:init()
 	--Control
-	self.hoverItem = 0
-	self.pressedItem = 0
-	self.focusOnItem = 0
-	self.lastWidget = 0
-	self.tabSwitch = true
-	
 	self.isShoudExit = false
 	
 	self.loopDelay = 10
 	
 	--Layout
-	self.width = 800
-	self.height = 600
 	self.backgroundColor = 0x77
 	self.title = "This is a test"
 	
 	--Env
 	self.uiDriver = uiDriver:new()
+	self.uiDriver.width = self.width
+	self.uiDriver.height = self.height
+	self.uiDriver.nativeResolutionFullScreen = self.nativeResolutionFullScreen
+	self.uiDriver.fullScreen = self.fullScreen
 	self.uiDriver:init()
+	self.width = self.uiDriver.width
+	self.height = self.uiDriver.height
 	
 	self.parent = self
 	self.ID = self:GenID()
@@ -126,6 +132,7 @@ end
 function teaUI:paint()
 	self:drawRect( 0, 0, self.width, self.height, self.backgroundColor )
 	self:drawString( self.title, 10, 10 )
+	-- self:setTitle( self.title )
 	
 	local el = self.element
 	
@@ -135,6 +142,14 @@ function teaUI:paint()
 			comp:paint()
 		end
 	end
+end
+
+function teaUI:setTitle( title )
+	self:getUIDriver():setWindowTitle( title )
+end
+
+function teaUI:toggleFullScreen()
+	self:getUIDriver():toggleFullScreen()
 end
 
 function teaUI:refresh()
@@ -303,7 +318,8 @@ function teaUI:checkHitOn( comp, x, y, width, height )
 		end
 	end
 	
-	if self:isNoOneFocusOn() then
+	--If no one has get focus or it has been hovered on and canHoverFocus, then gets the focus
+	if self:isNoOneFocusOn() or ( comp.canHoverFocus == true and self:isMouseHover( comp ) ) then
 		self:focusOn( comp )
 	end
 end
@@ -396,13 +412,61 @@ function teaUI:onQuit( evt )
 	self.isShoudExit = true
 end
 
+function teaUI:printCoError( co, errorMsg )
+	local inCoMsg
+	if errorMsg ~= nil then
+		inCoMsg = "\n\nIn coroutine:" .. errorMsg
+	else
+		inCoMsg = "\n\nUnknown Error"
+	end
+	error( inCoMsg .. "\n" .. debug.traceback( co ) .. "\n\nIn calling thread:" )
+end
+
+function teaUI:createEventThreadAndStart( theFunc, myself, evt )
+	local co = coroutine.create( theFunc )
+	local coStatus, errorMsg = false, nil
+	
+	coStatus, errorMsg = coroutine.resume( co, myself, evt )
+	
+	if coStatus == false then
+		teaUI:printCoError( co, errorMsg )
+	end
+	
+	return co
+end
+
+function teaUI:createSimpleThreadAndStart( theFunc, myself )
+	local co = coroutine.create( theFunc )
+	local coStatus,errMsg = false, nil
+	
+	if myself ~= nil then
+		coStatus, errMsg = coroutine.resume( co, myself )
+	else
+		coStatus, errMsg = coroutine.resume( co )
+	end
+	
+	if coStatus == false then
+		teaUI:printCoError( co, errorMsg )
+	end
+	
+	return co
+end
+
+function teaUI:pollingAndHandlingEvent()
+	local driver = self:getUIDriver()
+	
+	while driver:isAnyEvent() do -- If non-Event, then repaint only
+		self:handleEvent( driver.rawEvent ) -- Detect rawEvent
+	end
+end
+
 function teaUI:mainLoop()
 	local driver = self:getUIDriver()
+	
 	while not self.isShoudExit do
-		while driver:isAnyEvent() do -- If non-Event, then repaint only
-			self:handleEvent( driver.rawEvent ) -- Detect rawEvent
-		end
-		self:paint() -- Render
+		self:createSimpleThreadAndStart( self.pollingAndHandlingEvent, self ) --Polling & Handling Events
+		
+		self:createSimpleThreadAndStart( self.paint, self ) -- Render
 		
 		self:refresh()
 		
