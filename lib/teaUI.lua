@@ -22,6 +22,7 @@ local teaUI = Component:extend{
 	canFocusOn = false, --Can focus on?
 	canEventOn = true, --Can Event handling?
 	canHoverOn = false, --Can Hover On -->but teaUI have no need and must be disabled
+	showFPS = false,
 	
 	--Layout
 	width = 800, height = 600, --That's screen width and height
@@ -67,6 +68,8 @@ function teaUI:init()
 	self.uiDriver:init()
 	self.width = self.uiDriver.width
 	self.height = self.uiDriver.height
+	
+	self.timestamp = self:getUIDriver():getTimestamp()
 	
 	self.parent = self
 	self.ID = self:GenID()
@@ -130,8 +133,16 @@ function teaUI:regionHit( x, y, w, h )
 end
 
 function teaUI:paint()
+	local title = self.title
+	local oldtimestamp = self.timestamp
+	if oldtimestamp == nil then
+		self.timestamp = self:getUIDriver():getTimestamp()
+	elseif self.showFPS then
+		self.timestamp = self:getUIDriver():getTimestamp()
+		title = string.format( "FPS: %0.2f", 1000/(self.timestamp - oldtimestamp) ) .. title
+	end
 	self:drawRect( 0, 0, self.width, self.height, self.backgroundColor )
-	self:drawString( self.title, 10, 10 )
+	self:drawString( title, 10, 10 )
 	-- self:setTitle( self.title )
 	
 	local el = self.element
@@ -189,7 +200,7 @@ function teaUI:handleEvent( rawEvent )
 	local platformConst = self:getPlatformConst()
 	local eventTypeConst = self:getEventTypeConst()
 	
-	local eventType = self:super().handleEvent ( self, evt )
+	local eventArray, valueArray = self:super().handleEvent ( self, evt )
 	
 	if driver:isKeyEntered( evt, platformConst.ESCAPE ) then
 		self.isShoudExit = true

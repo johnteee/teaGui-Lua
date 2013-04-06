@@ -16,6 +16,8 @@ end
 
 --Create new teaUI (myUI is Global Variable)
 myUI = teaUI:create( 800, 600 )
+myUI.loopDelay = 10 -- delay
+myUI.showFPS = true -- Show FPS
 function myUI:onMouseDown ( evt )
 	print( "I'm myUI" ) --teaUI can get all event except drag,and it's useful for game input(global input event)
 	printIDs( self )

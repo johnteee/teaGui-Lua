@@ -15,7 +15,7 @@ local uiDriver = Object:extend{
 	width = 800, height = 600,
 	nativeWidth = 0, nativeHeight = 0,
 	fullScreen = false, nativeResolutionFullScreen = false,
-	videoFlags = 0,
+	videoFlags = 0,cursorSpeed = 500,
 	
 	fontWidth = 14, fontHeight = 24,
 	fontRequire = "font14x24",
@@ -166,7 +166,7 @@ function uiDriver:setWindowTitle( title )
 end
 
 function uiDriver:randomColor()
-	return bor( sdl.SDL_GetTicks() * 0xc0cac01a, 0x77 )
+	return bor( self:getTimestamp() * 0xc0cac01a, 0x77 )
 end
 
 function uiDriver:toggleFullScreen()
@@ -183,7 +183,13 @@ function uiDriver:toggleFullScreen()
 end
 
 function uiDriver:isShowCursorNow()
-	return band(shiftRight(sdl.SDL_GetTicks(), 8), 1)
+	local speed = self.cursorSpeed
+	return fmod(self:getTimestamp(), speed) < speed/2--band(shiftRight(self:getTimestamp(), 8), 1)
+end
+
+function uiDriver:getTimestamp()
+	--return sdl.SDL_GetTicks()
+	return os.clock() * 1000
 end
 
 function uiDriver:sleep( msec )
