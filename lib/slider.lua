@@ -1,4 +1,6 @@
-local Component = require( "component" )
+package.path = package.path .. ";../?.lua;?.lua;lib/?.lua"
+
+local Component = require( "lib.component" )
 
 local min, max = math.min, math.max
 

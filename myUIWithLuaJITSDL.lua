@@ -1,8 +1,10 @@
 -- Reference: http://sol.gfxile.net/imgui/ch06.html
 --  Based on: http://sol.gfxile.net/imgui/ch06.cpp
 
-package.path = package.path .. ";./lib/?.lua"
+package.path = package.path .. ";../?.lua;?.lua;lib/?.lua"
+
 local teaUI = require( "teaUI" )
+local SDLUIDriver = require( "sdluidriver" )
 local Button = require( "button" )
 local Slider = require( "slider" )
 local Textfield = require( "textfield" )
@@ -15,7 +17,7 @@ local function printIDs( self )
 end
 
 --Create new teaUI (myUI is Global Variable)
-myUI = teaUI:create( 800, 600 )
+myUI = teaUI:create( SDLUIDriver:new(), 800, 600 ) --Use UIDriver
 myUI.loopDelay = 10 -- delay
 myUI.showFPS = true -- Show FPS
 function myUI:onMouseDown ( evt )

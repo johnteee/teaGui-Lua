@@ -1,8 +1,8 @@
-package.path = package.path .. ";./?.lua"
-local Object = require ( "object" )
-local uiDriver = require( "uidriver" )
-local Event = require( "event" )
-local Component = require( "component" )
+package.path = package.path .. ";../?.lua;?.lua;lib/?.lua"
+
+local Object = require ( "lib.object" )
+local Event = require( "lib.event" )
+local Component = require( "lib.component" )
 local shiftLeft, shiftRight, bor, band, min, max, fmod = bit.lshift, bit.rshift, bit.bor, bit.band, math.min, math.max, math.fmod
 
 local teaUI = Component:extend{
@@ -36,13 +36,14 @@ local teaUI = Component:extend{
 	title = "This is a test" --Caption for test
 }
 
-function teaUI:create( width, height, fullScreen, nativeResolutionFullScreen )
+function teaUI:create( uiDriver, width, height, fullScreen, nativeResolutionFullScreen )
 	local newOne = self:new()
 	
 	newOne.width = width or newOne.width
 	newOne.height = height or newOne.height
 	newOne.fullScreen = fullScreen or newOne.fullScreen
 	newOne.nativeResolutionFullScreen = nativeResolutionFullScreen or newOne.nativeResolutionFullScreen
+	newOne.uiDriver = uiDriver
 	
 	newOne:init() -- Initialize
 	
@@ -60,7 +61,6 @@ function teaUI:init()
 	self.title = "This is a test"
 	
 	--Env
-	self.uiDriver = uiDriver:new()
 	self.uiDriver.width = self.width
 	self.uiDriver.height = self.height
 	self.uiDriver.nativeResolutionFullScreen = self.nativeResolutionFullScreen
@@ -121,7 +121,10 @@ function teaUI:CurrentLine()
 end
 
 function teaUI:GenID()
-	return self:CurrentLine()
+	self.snID = self.snID or 0
+	self.snID = self.snID + 1
+	return self.snID
+	--return self:CurrentLine()
 end
 
 function teaUI:regionHit( x, y, w, h )
@@ -135,12 +138,14 @@ end
 function teaUI:paint()
 	local title = self.title
 	local oldtimestamp = self.timestamp
+	
 	if oldtimestamp == nil then
 		self.timestamp = self:getUIDriver():getTimestamp()
 	elseif self.showFPS then
 		self.timestamp = self:getUIDriver():getTimestamp()
-		title = string.format( "FPS: %0.2f", 1000/(self.timestamp - oldtimestamp) ) .. title
+		title = string.format( "%s\tFPS: %0.2f", title, 1000/(self.timestamp - oldtimestamp) )
 	end
+	
 	self:drawRect( 0, 0, self.width, self.height, self.backgroundColor )
 	self:drawString( title, 10, 10 )
 	-- self:setTitle( self.title )
@@ -430,7 +435,7 @@ function teaUI:printCoError( co, errorMsg )
 	else
 		inCoMsg = "\n\nUnknown Error"
 	end
-	error( inCoMsg .. "\n" .. debug.traceback( co ) .. "\n\nIn calling thread:" )
+	error( string.format( "%s\n%s\n\nIn calling thread:", inCoMsg, debug.traceback( co ) ) )
 end
 
 function teaUI:createEventThreadAndStart( theFunc, myself, evt )

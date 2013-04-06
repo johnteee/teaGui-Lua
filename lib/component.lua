@@ -1,4 +1,6 @@
-local Object = require( "object" )
+package.path = package.path .. ";../?.lua;?.lua;lib/?.lua"
+
+local Object = require( "lib.object" )
 
 local Component = Object:extend{
 	className = "Component",

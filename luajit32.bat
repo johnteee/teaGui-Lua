@@ -1,0 +1,1 @@
+d:\devkit\ufo-master\luajit32.cmd %*

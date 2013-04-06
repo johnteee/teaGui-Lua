@@ -4,8 +4,8 @@ local sdl = require( "ffi/sdl" )
 local Event = require( "event" )
 local shiftLeft, shiftRight, bor, band, bxor, min, max, fmod = bit.lshift, bit.rshift, bit.bor, bit.band, bit.bxor, math.min, math.max, math.fmod
 
-local uiDriver = Object:extend{
-	className = "uiDriver",
+local sdlUIDriver = Object:extend{
+	className = "sdlUIDriver",
 	
 	--Control
 	event = nil,
@@ -25,7 +25,7 @@ local uiDriver = Object:extend{
 	eventTypeConst = nil
 }
 
-function uiDriver:init()
+function sdlUIDriver:init()
 	--Env
 	SDL_INIT_AUDIO = 0x00000010
 	SDL_INIT_VIDEO = 0x00000020
@@ -94,7 +94,7 @@ function uiDriver:init()
 	self.eventTypeConst.KEYUP = sdl.SDL_KEYUP
 end
 
-function uiDriver:loadBitmap ( path )
+function sdlUIDriver:loadBitmap ( path )
 	local file = sdl.SDL_RWFromFile( path, "rb")
 	local temp = sdl.SDL_LoadBMP_RW(file, 1)
 	local img = sdl.SDL_ConvertSurface( temp, self.screen.format, sdl.SDL_SWSURFACE )
@@ -103,12 +103,12 @@ function uiDriver:loadBitmap ( path )
 	return img
 end
 
-function uiDriver:requireFont( name )
+function sdlUIDriver:requireFont( name )
 	local font = require( "font/" .. name )
 	return self:makeFont( font )
 end
 
-function uiDriver:makeFont( font )
+function sdlUIDriver:makeFont( font )
 	local data = ffi.new( "uint8_t[?]", #font, font )
 	local file = sdl.SDL_RWFromConstMem( data, ffi.sizeof(data) )
 	local temp = sdl.SDL_LoadBMP_RW(file, 1)
@@ -118,21 +118,21 @@ function uiDriver:makeFont( font )
 	return font
 end
 
-function uiDriver:drawCharCode( charcode, x, y )
+function sdlUIDriver:drawCharCode( charcode, x, y )
 	self.rectFg.x, self.rectFg.y, self.rectFg.w, self.rectFg.h = 0, (charcode - 32) * self.fontHeight, self.fontWidth, self.fontHeight
 	self.rectBg.x, self.rectBg.y, self.rectBg.w, self.rectBg.h = x, y, self.fontWidth, self.fontHeight
 	-- sdl.SDL_BlitSurface( self.font, self.rectFg, self.screen, self.rectBg )
 	sdl.SDL_UpperBlit( self.font, self.rectFg, self.screen, self.rectBg )
 end
 
-function uiDriver:drawImage( img, x, y, width, height )
+function sdlUIDriver:drawImage( img, x, y, width, height )
 	self.rectFg.x, self.rectFg.y, self.rectFg.w, self.rectFg.h = 0, 0, width or img.w, height or img.h
 	self.rectBg.x, self.rectBg.y, self.rectBg.w, self.rectBg.h = x, y, width or img.w, height or img.h
 	-- sdl.SDL_BlitSurface( img, self.rectFg, self.screen, self.rectBg )
 	sdl.SDL_UpperBlit( img, self.rectFg, self.screen, self.rectBg )
 end
 
-function uiDriver:drawRect( x, y, w, h, color )
+function sdlUIDriver:drawRect( x, y, w, h, color )
 	self.rectFg.x, self.rectFg.y, self.rectFg.w, self.rectFg.h = x, y, w, h
 	
 	r, g, b, alpha = self:getRGBA( color, alpha )
@@ -140,7 +140,7 @@ function uiDriver:drawRect( x, y, w, h, color )
 	sdl.SDL_RenderFillRect( self.renderer, self.rectFg )
 end
 
-function uiDriver:drawRectWire( x, y, w, h, color, alpha)
+function sdlUIDriver:drawRectWire( x, y, w, h, color, alpha)
 	self.rectFg.x, self.rectFg.y, self.rectFg.w, self.rectFg.h = x, y, w, h
 	
 	r, g, b, alpha = self:getRGBA( color, alpha )
@@ -148,7 +148,7 @@ function uiDriver:drawRectWire( x, y, w, h, color, alpha)
 	sdl.SDL_RenderDrawRect( self.renderer, self.rectFg )
 end
 
-function uiDriver:getRGBA( color, alpha )
+function sdlUIDriver:getRGBA( color, alpha )
 	local r, g, b =
 	shiftRight( color, 8 + 8 ), shiftRight( fmod( color, (256 * 256) ) , 8 ),
 	fmod( color, (256) )
@@ -157,19 +157,19 @@ function uiDriver:getRGBA( color, alpha )
 	return r, g, b, alpha
 end
 
-function uiDriver:refresh()
+function sdlUIDriver:refresh()
 	sdl.SDL_UpdateRect( self.screen, 0, 0, self.width, self.width )
 end
 
-function uiDriver:setWindowTitle( title )
+function sdlUIDriver:setWindowTitle( title )
 	sdl.SDL_WM_SetCaption( title, nil );
 end
 
-function uiDriver:randomColor()
+function sdlUIDriver:randomColor()
 	return bor( self:getTimestamp() * 0xc0cac01a, 0x77 )
 end
 
-function uiDriver:toggleFullScreen()
+function sdlUIDriver:toggleFullScreen()
 	-- if self.nativeResolutionFullScreen then
 		-- self.videoFlags = bxor( self.videoFlags, sdl.SDL_FULLSCREEN )
 		-- local oldscreen, oldrenderer = self.screen, self.renderer
@@ -182,25 +182,25 @@ function uiDriver:toggleFullScreen()
 	-- end
 end
 
-function uiDriver:isShowCursorNow()
+function sdlUIDriver:isShowCursorNow()
 	local speed = self.cursorSpeed
 	return fmod(self:getTimestamp(), speed) < speed/2--band(shiftRight(self:getTimestamp(), 8), 1)
 end
 
-function uiDriver:getTimestamp()
+function sdlUIDriver:getTimestamp()
 	--return sdl.SDL_GetTicks()
 	return os.clock() * 1000
 end
 
-function uiDriver:sleep( msec )
+function sdlUIDriver:sleep( msec )
 	sdl.SDL_Delay( msec )
 end
 
-function uiDriver:getEvent()
+function sdlUIDriver:getEvent()
 	return self.event
 end
 
-function uiDriver:handleRawEvent( rawEvent )
+function sdlUIDriver:handleRawEvent( rawEvent )
 	local evttype, key, keymod, keyunicode = rawEvent.type, rawEvent.key.keysym.sym, rawEvent.key.keysym.mod, rawEvent.key.keysym.unicode
 	local buttonbutton, buttonmousestate = rawEvent.button.button, rawEvent.button.state
 	local motionmousestate = rawEvent.motion.state
@@ -238,19 +238,19 @@ function uiDriver:handleRawEvent( rawEvent )
 	return evt
 end
 
-function uiDriver:isKeyMod( evt, keyMod )
+function sdlUIDriver:isKeyMod( evt, keyMod )
 	return band( evt.keyMod, keyMod )
 end
 
-function uiDriver:isKeyEntered( evt, key )
+function sdlUIDriver:isKeyEntered( evt, key )
 	return evt.keyEntered == key
 end
 
-function uiDriver:isEventType( evt, eventType )
+function sdlUIDriver:isEventType( evt, eventType )
 	return evt.eventType == eventType
 end
 
-function uiDriver:isAnyEvent()
+function sdlUIDriver:isAnyEvent()
 	if sdl.SDL_PollEvent( self.rawEvent ) ~= 0 then
 		return true
 	else
@@ -258,8 +258,8 @@ function uiDriver:isAnyEvent()
 	end
 end
 
-function uiDriver:quit ()
+function sdlUIDriver:quit ()
 	sdl.SDL_Quit()
 end
 
-return uiDriver
+return sdlUIDriver
